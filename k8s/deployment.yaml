@@ -1,1 +1,292 @@
-# ✅ K8s manifests
+# Kubernetes deployment for Camel Router
+# Supports horizontal scaling and resource management
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: camel-router
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: camel-router-config
+  namespace: camel-router
+data:
+  routes.yaml: |
+    # Kubernetes-optimized routes
+    routes:
+      - name: "distributed_camera_processing"
+        from: "rtsp://{{CAMERA_USER}}:{{CAMERA_PASS}}@{{CAMERA_IP}}/stream1"
+        
+        processors:
+          # Distributed processing across pods
+          - type: "external"
+            command: "python scripts/detect_objects.py"
+            input_format: "json"
+            output_format: "json"
+            config:
+              confidence_threshold: 0.6
+              model: "yolov8n.pt"
+              target_objects: ["person", "car"]
+              distributed: true
+              
+          - type: "external"
+            command: "go run scripts/image_processor.go"
+            input_format: "json"
+            output_format: "json"
+            config:
+              replicas: 3
+              load_balance: true
+        
+        to:
+          - "http://alert-service.camel-router.svc.cluster.local:8080/alerts"
+          - "mqtt://mqtt-broker.camel-router.svc.cluster.local:1883/camera/events"
+
+      - name: "health_monitoring"
+        from: "timer://30s"
+        
+        processors:
+          - type: "external"
+            command: "go run scripts/health_check.go"
+            config:
+              check_endpoints: "http://detection-service:8080/health,http://alert-service:8080/health"
+              
+        to: "http://monitoring.camel-router.svc.cluster.local:8080/metrics"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: camel-router-secrets
+  namespace: camel-router
+type: Opaque
+stringData:
+  CAMERA_USER: "admin"
+  CAMERA_PASS: "your_camera_password"
+  SMTP_USER: "alerts@yourcompany.com"
+  SMTP_PASS: "your_smtp_password"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: camel-router
+  namespace: camel-router
+  labels:
+    app: camel-router
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: camel-router
+  template:
+    metadata:
+      labels:
+        app: camel-router
+    spec:
+      containers:
+      - name: camel-router
+        image: camel-router:latest
+        imagePullPolicy: Always
+        command: ["camel-router"]
+        args: ["run", "-c", "/config/routes.yaml", "--verbose"]
+
+        # Resource limits for ML workloads
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "2000m"
+
+        # Environment variables from secrets and config
+        env:
+        - name: CAMERA_IP
+          value: "192.168.1.100"
+        - name: CAMERA_NAME
+          value: "k8s-camera"
+        - name: SMTP_SERVER
+          value: "smtp.gmail.com"
+        - name: SMTP_PORT
+          value: "587"
+        - name: SECURITY_EMAIL
+          value: "security@yourcompany.com"
+
+        envFrom:
+        - secretRef:
+            name: camel-router-secrets
+
+        # Mount configuration
+        volumeMounts:
+        - name: config-volume
+          mountPath: /config
+        - name: logs-volume
+          mountPath: /app/logs
+        - name: shared-storage
+          mountPath: /app/shared
+
+        # Health checks
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
+        # Security context
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 1000
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+
+      volumes:
+      - name: config-volume
+        configMap:
+          name: camel-router-config
+      - name: logs-volume
+        emptyDir: {}
+      - name: shared-storage
+        persistentVolumeClaim:
+          claimName: camel-router-pvc
+
+      # Node selector for GPU nodes (if needed)
+      nodeSelector:
+        accelerator: "nvidia-tesla-k80"
+
+      # Tolerations for dedicated ML nodes
+      tolerations:
+      - key: "ml-workload"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: camel-router-service
+  namespace: camel-router
+spec:
+  selector:
+    app: camel-router
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  - name: metrics
+    port: 9090
+    targetPort: 9090
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: camel-router-pvc
+  namespace: camel-router
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: fast-ssd
+
+---
+# Horizontal Pod Autoscaler for automatic scaling
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: camel-router-hpa
+  namespace: camel-router
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: camel-router
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  # Custom metrics for ML workloads
+  - type: External
+    external:
+      metric:
+        name: camera_queue_length
+      target:
+        type: Value
+        value: "10"
+
+---
+# ServiceMonitor for Prometheus monitoring
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: camel-router-metrics
+  namespace: camel-router
+spec:
+  selector:
+    matchLabels:
+      app: camel-router
+  endpoints:
+  - port: metrics
+    interval: 30s
+    path: /metrics
+
+---
+# Network Policy for security
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: camel-router-network-policy
+  namespace: camel-router
+spec:
+  podSelector:
+    matchLabels:
+      app: camel-router
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+    ports:
+    - protocol: TCP
+      port: 9090
+  egress:
+  - {} # Allow all egress for external services
+
+---
+# Pod Disruption Budget for high availability
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: camel-router-pdb
+  namespace: camel-router
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: camel-router

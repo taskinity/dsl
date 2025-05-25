@@ -1,4 +1,4 @@
-# Camel Router - Multi-Language ML/Media Processing Engine
+# Taskinity DSL - Multi-Language ML/Media Processing Engine
 
 🚀 **Apache Camel-style routing engine** for computer vision, machine learning, and multimedia processing pipelines that can delegate tasks to **multiple programming languages**.
 
