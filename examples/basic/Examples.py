@@ -1,0 +1,9 @@
+routes:
+  - name: "camera_detection"
+    from: "rtsp://user:pass@192.168.1.100/stream1"
+    processors:
+      - type: "external"
+        command: "python detect_objects.py"
+        config:
+          confidence_threshold: 0.6
+    to: "email://smtp.gmail.com:587?user=alerts@company.com&password=pass&to=security@company.com"
