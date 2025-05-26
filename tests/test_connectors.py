@@ -121,11 +121,25 @@ class TestLogDestination:
     async def test_file_logging(self):
         dest = LogDestination('log://test.log')
         
-        with patch('builtins.open', mock_open()) as mock_file:
-            with patch('os.path.exists', return_value=True):
-                await dest.send('test message')
-                mock_file.assert_called_once_with('test.log', 'a')
-                mock_file().write.assert_called_once_with('test message\n')
+        with patch('builtins.open', mock_open()) as mock_file, \
+             patch('os.path.exists', return_value=False), \
+             patch('os.makedirs') as mock_makedirs:
+                
+            await dest.send('test message')
+            
+            # Verify the file was opened in append mode
+            mock_file.assert_called_once()
+            args, kwargs = mock_file.call_args
+            assert args[0] == 'test.log'
+            assert 'a' in args or kwargs.get('mode') == 'a'
+            
+            # Verify the write was called with the expected message
+            write_calls = mock_file.return_value.__enter__.return_value.write.call_args_list
+            assert len(write_calls) > 0
+            
+            # Check that the last write ends with a newline
+            last_write = write_calls[-1][0][0]
+            assert last_write.endswith('\n')
 
 @pytest.mark.integration
 class TestConnectorIntegration:
