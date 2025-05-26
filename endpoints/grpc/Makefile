@@ -1,7 +1,7 @@
 .PHONY: build test clean
 
 build:
-	docker build -t grpc-mock -f docker/Dockerfile ..
+	docker build -t grpc-mock -f docker/Dockerfile .
 
 test:
 	ansible-playbook -i ../inventory.ini ansible/test.yml

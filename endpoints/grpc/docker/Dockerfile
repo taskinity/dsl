@@ -11,15 +11,22 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Install grpcio-tools for protoc
+RUN pip install --no-cache-dir grpcio-tools
+
 # Copy protos and generate Python code
 COPY protos/ /app/protos/
 RUN python -m grpc_tools.protoc -I /app/protos \
     --python_out=/app --grpc_python_out=/app \
     /app/protos/example.proto
 
-# Copy server code
+# Copy server and client code
 COPY server.py .
 COPY client.py .
+
+# Copy the proto generated files (in case they're needed)
+COPY protos/example_pb2.py .
+COPY protos/example_pb2_grpc.py .
 
 # Create a non-root user and switch to it
 RUN useradd -m appuser && chown -R appuser:appuser /app
