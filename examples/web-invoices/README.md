@@ -1,27 +1,14 @@
 # Web Invoice Processor
 
-This utility retrieves invoices from various provider websites and organizes them in a structured directory layout.
-
-## Table of Contents
-- [Features](#features)
-- [Directory Structure](#directory-structure)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Usage](#usage)
-- [Makefile Commands](#makefile-commands)
-- [Adding a New Provider](#adding-a-new-provider)
-- [Error Handling](#error-handling)
-- [Security Notes](#security-notes)
-- [License](#license)
+This is a web invoice processor that demonstrates how to use the Taskinity DSL for processing invoices from various cloud providers with local processing.
 
 ## Features
 
-- Supports multiple cloud providers (AWS, Google Cloud, Azure, etc.)
-- Downloads invoices and saves them in a consistent directory structure
-- Saves metadata for each invoice in JSON format
-- Handles authentication with different providers
-- Extensible architecture for adding new providers
+- Supports multiple cloud providers (AWS, Google Cloud, Azure)
+- Downloads and processes invoices locally
+- Extracts invoice data to structured format
+- Configurable through YAML and environment variables
+- Local processing with no external API dependencies
 
 ## Directory Structure
 

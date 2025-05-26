@@ -1,54 +1,222 @@
 # Email Invoice Processor
 
-This utility processes email attachments (invoices, receipts, etc.) from a specified month, extracts text using OCR, and organizes them in a structured directory layout.
+This is an email invoice processor that demonstrates how to use the Taskinity DSL for processing email attachments with local OCR processing.
 
 ## Features
 
-- Connects to IMAP email server
-- Processes emails from a specific month
-- Extracts attachments (PDF, JPG, JPEG, PNG)
-- Performs OCR to extract text from images and PDFs
-- Organizes files in a structured directory layout:
-  ```
-  output/
-  └── YYYY-MM/
-      └── sender_domain/
-          └── invoices/
-              ├── original_file.pdf
-              └── original_file.json  # Contains extracted text and metadata
-  ```
-- Generates metadata JSON for each processed file
+- Fetches emails from IMAP server
+- Processes email attachments (PDF, JPG, PNG)
+- Local OCR processing with Tesseract
+- Extracts invoice data to structured format
+- Configurable through YAML and environment variables
 
 ## Prerequisites
 
 - Python 3.8+
-- Tesseract OCR engine installed on your system
-- Poppler tools (for PDF processing)
-- Make
+- Tesseract OCR
+- Poppler Utils (for PDF processing)
+- Required Python packages (see `requirements.txt`)
 
 ## Installation
 
-1. Install system dependencies:
-
-   On Ubuntu/Debian:
+1. Clone the repository:
    ```bash
-   sudo apt update
-   sudo apt install tesseract-ocr poppler-utils
+   git clone https://github.com/your-org/taskinity-dsl.git
+   cd taskinity-dsl/examples/email-invoices
    ```
 
-   On macOS (using Homebrew):
+2. Install system dependencies:
    ```bash
-   brew install tesseract poppler
-   ```
-
-2. Set up the development environment using Make:
-   ```bash
-   make setup
-   ```
+   # Ubuntu/Debian
+   sudo apt-get update && sudo apt-get install -y \
+       tesseract-ocr tesseract-ocr-eng tesseract-ocr-pol \
+       poppler-utils ghostscript
    
-   This will:
-   - Create a Python virtual environment
-   - Install all required dependencies
+   # Or using the Makefile:
+   make install-deps
+   ```
+
+3. Install Python dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. Copy and configure the environment:
+   ```bash
+   cp .env.example .env
+   # Edit .env with your email settings
+   ```
+
+## Configuration
+
+### Environment Variables
+
+Create a `.env` file with the following variables:
+
+```ini
+# Email Server Configuration
+EMAIL_SERVER=imap.example.com
+EMAIL_PORT=993
+EMAIL_USER=your-email@example.com
+EMAIL_PASSWORD=your-password
+EMAIL_FOLDER=INBOX
+
+# Processing Settings
+PROCESSED_FOLDER=Processed
+ERROR_FOLDER=Errors
+OUTPUT_DIR=./output
+LOG_LEVEL=INFO
+
+# OCR Settings
+TESSERACT_CMD=/usr/bin/tesseract
+OCR_LANGUAGES=eng,pol
+```
+
+### YAML Configuration
+
+The main configuration is in `process_invoices.yaml`. Key sections:
+
+```yaml
+email:
+  server: "{{EMAIL_SERVER}}"
+  port: {{EMAIL_PORT|int}}
+  username: "{{EMAIL_USER}}"
+  password: "{{EMAIL_PASSWORD}}"
+  folder: "{{EMAIL_FOLDER|default('INBOX')}}"
+
+processing:
+  output_dir: "{{OUTPUT_DIR|default('./output')}}"
+  processed_folder: "{{PROCESSED_FOLDER|default('Processed')}}"
+  error_folder: "{{ERROR_FOLDER|default('Errors')}}"
+  
+ocr:
+  engine: "tesseract"
+  config:
+    tesseract_cmd: "{{TESSERACT_CMD|default('tesseract')}}"
+    languages: ["eng", "pol"]
+```
+
+## Usage
+
+### Command Line
+
+```bash
+# Process emails using the DSL
+python -m taskinity.runner --config process_invoices.yaml
+
+# Or use the Python script directly
+python -m email_processor --config process_invoices.yaml
+
+# Process specific email by ID
+python -m email_processor --email-id 12345
+
+# Process emails from a specific date
+python -m email_processor --since "2023-01-01"
+```
+
+### Makefile Commands
+
+```bash
+# Install dependencies
+make install
+
+# Run the processor
+make run
+
+# Run tests
+make test
+
+# Clean up
+make clean
+```
+
+## Testing
+
+### Unit Tests
+
+```bash
+# Run all tests
+pytest tests/
+
+# Run with coverage
+pytest --cov=email_processor tests/
+```
+
+### Integration Tests
+
+1. Start a test email server:
+   ```bash
+   python -m smtpd -n -c DebuggingServer localhost:1025
+   ```
+
+2. Run the processor in test mode:
+   ```bash
+   python -m email_processor --test-mode
+   ```
+
+## Logs
+
+Logs are written to the following locations by default:
+
+- Application logs: `logs/email_processor.log`
+- Error logs: `logs/errors.log`
+- Debug logs: `logs/debug.log` (when LOG_LEVEL=DEBUG)
+
+View logs in real-time:
+```bash
+tail -f logs/email_processor.log
+```
+
+## Docker
+
+### Build and Run
+
+```bash
+# Build the image
+docker build -t email-processor .
+
+# Run the container
+docker run --rm -v $(pwd)/output:/app/output email-processor
+```
+
+### Docker Compose
+
+```yaml
+version: '3.8'
+services:
+  email-processor:
+    build: .
+    volumes:
+      - ./output:/app/output
+      - ./logs:/app/logs
+    environment:
+      - EMAIL_SERVER=imap.example.com
+      - EMAIL_USER=user@example.com
+      - EMAIL_PASSWORD=password
+    restart: unless-stopped
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Authentication Failed**
+   - Verify email credentials
+   - Check if IMAP access is enabled for your email account
+   - For Gmail, you may need to use an App Password
+
+2. **OCR Not Working**
+   - Ensure Tesseract is installed and in PATH
+   - Verify language packs are installed
+   - Check file permissions on input files
+
+3. **PDF Processing Errors**
+   - Ensure Poppler Utils is installed
+   - Check PDF file integrity
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
    - Set up development tools
 
 ## Configuration
