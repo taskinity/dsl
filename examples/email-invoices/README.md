@@ -24,6 +24,7 @@ This utility processes email attachments (invoices, receipts, etc.) from a speci
 - Python 3.8+
 - Tesseract OCR engine installed on your system
 - Poppler tools (for PDF processing)
+- Make
 
 ## Installation
 
@@ -40,32 +41,82 @@ This utility processes email attachments (invoices, receipts, etc.) from a speci
    brew install tesseract poppler
    ```
 
-2. Install Python dependencies:
+2. Set up the development environment using Make:
    ```bash
-   pip install -r requirements.txt
+   make setup
    ```
+   
+   This will:
+   - Create a Python virtual environment
+   - Install all required dependencies
+   - Set up development tools
 
 ## Configuration
 
-1. Copy the example config file:
+1. Copy the example environment file:
    ```bash
-   cp config/config.json.example config/config.json
+   cp .env.example .env
    ```
 
-2. Edit `config/config.json` with your email credentials and settings:
-   - `email`: Your email address
-   - `password`: Your email password or app-specific password
-   - `imap_server`: IMAP server address (e.g., imap.gmail.com)
-   - `imap_port`: IMAP port (usually 993 for SSL)
-   - `output_dir`: Directory to save processed files
-   - `year`: Year to process (e.g., 2025)
-   - `month`: Month to process (1-12, e.g., 5 for May)
+2. Edit `.env` with your email credentials and settings:
+   ```ini
+   # Email Server Configuration
+   EMAIL_SERVER=imap.example.com
+   EMAIL_PORT=993
+   EMAIL_USERNAME=your_email@example.com
+   EMAIL_PASSWORD=your_app_specific_password
+   
+   # Processing Settings
+   YEAR=2025
+   MONTH=5
+   OUTPUT_DIR=./output
+   
+   # OCR Settings
+   TESSERACT_CMD=/usr/bin/tesseract
+   
+   # Logging
+   LOG_LEVEL=INFO
+   LOG_FILE=email_processor.log
+   ```
+
+   > **Note**: For Gmail, you'll need to generate an App Password if you have 2FA enabled.
 
 ## Usage
 
-Run the processor:
+### Using Make (recommended)
 ```bash
+# Run the email processor
+make run
+
+# Run with specific month and year
+YEAR=2025 MONTH=5 make run
+```
+
+### Direct Python execution
+
+```bash
+# Activate the virtual environment
+source venv/bin/activate  # On Windows: .\venv\Scripts\activate
+
+# Run the processor
 python process_invoices.py
+
+# Or with environment variables
+YEAR=2025 MONTH=5 python process_invoices.py
+```
+
+## Makefile Commands
+
+The Makefile provides several useful commands:
+
+```bash
+make setup     # Set up the development environment
+make install   # Install the package in development mode
+make test      # Run tests
+make lint      # Run code style checks
+make format    # Format the code
+make run       # Run the email processor
+make clean     # Clean up temporary files
 ```
 
 ## Output Structure
@@ -81,10 +132,12 @@ For each processed email attachment, the script will create:
 
 ## Security Notes
 
-- Never commit your email credentials to version control
-- Consider using environment variables or a secrets manager in production
+- Never commit your `.env` file to version control
+- The `.env.example` file is versioned, but the actual `.env` is in `.gitignore`
+- Use app-specific passwords instead of your main email password
 - The script only processes emails from the specified month
 - Original files are preserved in their original format
+- The virtual environment directory (`venv/`) is also in `.gitignore`
 
 ## Troubleshooting
 

@@ -1,0 +1,30 @@
+{
+  "output_dir": "./output",
+  "year": 2025,
+  "month": 5,
+  "providers": {
+    "example_provider": {
+      "enabled": true,
+      "username": "your_username",
+      "password": "your_password",
+      "api_key": "your_api_key_here",
+      "other_settings": {}
+    },
+    "aws": {
+      "enabled": true,
+      "access_key_id": "your_aws_access_key",
+      "secret_access_key": "your_aws_secret_key"
+    },
+    "google_cloud": {
+      "enabled": true,
+      "service_account_file": "/path/to/service-account.json"
+    },
+    "azure": {
+      "enabled": true,
+      "subscription_id": "your_subscription_id",
+      "client_id": "your_client_id",
+      "client_secret": "your_client_secret",
+      "tenant_id": "your_tenant_id"
+    }
+  }
+}
