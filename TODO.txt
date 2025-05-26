@@ -1,21 +1,29 @@
-# Taskinity DSL - Refactoring and Testing Roadmap
+# DialogChain - Project Roadmap
 
 ## Phase 1: Project Setup and Structure
-- [ ] Create a proper Python package structure
-  - [ ] Move source code to `src/taskinity/`
-  - [ ] Update `setup.py` with proper package metadata
-  - [ ] Add `pyproject.toml` for modern Python packaging
+- [x] Create a proper Python package structure
+  - [x] Move source code to `dialogchain/`
+  - [x] Update package metadata in `pyproject.toml`
+  - [x] Set up Poetry for dependency management
+  - [ ] Add proper project documentation
+  - [ ] Set up CI/CD pipeline
 
-## Phase 2: Core Refactoring (src/ directory)
+## Phase 2: Core Refactoring
+- [ ] Refactor core modules
+  - [ ] Standardize code style with Black
+  - [ ] Add type hints throughout the codebase
+  - [ ] Implement proper error handling
+  - [ ] Add comprehensive test coverage
 
 ### 2.1 API Module Refactoring
-- [ ] Consolidate API modules into a single package
-  - [ ] Merge related modules (e.g., Source_URIs.py and Destination_URIs.py)
-  - [ ] Add proper type hints
+- [ ] Consolidate API modules
+  - [ ] Merge related modules
+  - [ ] Add OpenAPI/Swagger documentation
   - [ ] Implement proper error handling hierarchy
+  - [ ] Add request/response validation
 
-### 2.2 Camel Router Refactoring
-- [ ] Refactor `camel_router/` package
+### 2.2 Dialog Processing Core
+- [ ] Refactor dialog processing logic
   - [ ] Standardize naming conventions (PEP 8)
   - [ ] Split large files into smaller modules
   - [ ] Implement proper dependency injection
@@ -33,22 +41,33 @@
   - [ ] Remove duplicate code
   - [ ] Add proper documentation
 
-## Phase 3: Testing Strategy
+## Phase 3: Testing & Quality
 
 ### 3.1 Test Infrastructure
 - [ ] Set up testing framework
-  - [ ] Add pytest configuration
-  - [ ] Configure test coverage reporting
-  - [ ] Set up test data fixtures
+  - [x] Configure pytest
+  - [ ] Set up test coverage reporting
+  - [ ] Add test data fixtures
+  - [ ] Set up pre-commit hooks with Black, isort, flake8
+  - [ ] Configure Tox for testing multiple Python versions
 
-### 3.2 Unit Tests
-- [ ] Core functionality
-  - [ ] Test configuration loading and validation
-  - [ ] Test route processing logic
-  - [ ] Test utility functions
+### 3.2 Testing Strategy
+- [ ] Unit Tests
+  - [ ] Core functionality
+  - [ ] Configuration handling
+  - [ ] Dialog processing logic
+  - [ ] Utility functions
+- [ ] Integration Tests
+  - [ ] API endpoints
+  - [ ] Database interactions
+  - [ ] External service integrations
 
-### 3.3 Integration Tests
-- [ ] Test component interactions
+### 3.3 Documentation
+- [ ] Update README with new features
+- [ ] Add API documentation
+- [ ] Create user guides
+- [ ] Add developer documentation
+- [ ] Document deployment process
   - [ ] Test API endpoints
   - [ ] Test connector integrations
   - [ ] Test full processing pipelines
@@ -93,3 +112,9 @@
 - isort (import sorting)
 - flake8 (linting)
 - pydantic (data validation)
+
+
+
+move dialogchain python package from /home/tom/github/taskinity/dsl to /home/tom/github/dialogchain/python
+move only necessary files which are part of python package without folders: examples, todo,, endpoints, ...
+

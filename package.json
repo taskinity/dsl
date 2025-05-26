@@ -9,9 +9,9 @@
     "format": "prettier --write *.js"
   },
   "keywords": [
-    "dialogchain",
+    "taskinity",
     "nlp",
-    "dialog",
+    "dialogchain",
     "conversation",
     "processing"
   ],

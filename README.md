@@ -2,6 +2,78 @@
 
 🚀 **DialogChain** is a flexible and extensible framework for building, managing, and deploying dialog systems and conversational AI applications. It supports multiple programming languages and integrates with various NLP and ML models.
 
+[![Python](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue)](https://www.python.org/)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
+
+## 📦 Installation
+
+### Prerequisites
+- Python 3.8+
+- [Poetry](https://python-poetry.org/docs/#installation)
+
+### Install with Poetry
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/taskinity/dialogchain.git
+   cd dialogchain
+   ```
+
+2. Install dependencies:
+   ```bash
+   poetry install
+   ```
+
+3. Activate the virtual environment:
+   ```bash
+   poetry shell
+   ```
+
+### Development Setup
+
+1. Install development dependencies:
+   ```bash
+   poetry install --with dev
+   ```
+
+2. Set up pre-commit hooks:
+   ```bash
+   pre-commit install
+   ```
+
+3. Run tests:
+   ```bash
+   poetry run pytest
+   ```
+
+## 🚀 Quick Start
+
+1. Create a configuration file `config.yaml`:
+   ```yaml
+   version: 1.0
+   
+   pipelines:
+     - name: basic_dialog
+       steps:
+         - type: input
+           name: user_input
+           source: console
+         - type: processor
+           name: nlp_processor
+           module: dialogchain.processors.nlp
+           function: process_text
+         - type: output
+           name: response
+           target: console
+   ```
+
+2. Run the dialog chain:
+   ```bash
+   poetry run dialogchain -c config.yaml
+   ```
+
 ## ✨ Features
 
 - **💬 Dialog Management**: Stateful conversation handling and context management
@@ -14,6 +86,33 @@
 - **🧪 Comprehensive Testing**: Unit, integration, and end-to-end tests
 - **🔍 Code Quality**: Type hints, linting, and code formatting
 - **📈 Scalable**: Horizontal scaling for high-throughput applications
+
+## 🛠️ Development
+
+### Code Style
+
+This project uses:
+- [Black](https://github.com/psf/black) for code formatting
+- [isort](https://pycqa.github.io/isort/) for import sorting
+- [Flake8](https://flake8.pycqa.org/) for linting
+- [mypy](http://mypy-lang.org/) for static type checking
+
+### Development Commands
+
+```bash
+# Run tests with coverage
+poetry run pytest --cov=dialogchain --cov-report=term-missing
+
+# Format code
+poetry run black .
+poetry run isort .
+
+# Lint code
+poetry run flake8
+
+# Type checking
+poetry run mypy dialogchain
+```
 
 ## 🏗️ Architecture
 
@@ -35,11 +134,14 @@
 
 ```bash
 # Clone repository
-git clone https://github.com/taskinity/camel-router
-cd camel-router
+git clone https://github.com/taskinity/dialogchain
+cd dialogchain
 
-# Quick setup with Makefile
-make quickstart
+# Install dependencies
+poetry install
+
+# Run the application
+poetry run dialogchain --help
 ```
 
 ### 2. Configuration
@@ -522,13 +624,7 @@ make dev
 # Run tests
 make test
 
-# Check code quality
-make lint
-```
-
-## 📝 License
-
-MIT License - see [LICENSE](LICENSE) file for details.
+For questions or support, please open an issue in the [issue tracker](https://github.com/taskinity/dialogchain/issues).
 
 ## 🔗 Related Projects
 
