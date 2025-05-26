@@ -1,0 +1,20 @@
+# Test dependencies
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.0.0
+pytest-mock>=3.10.0
+coverage>=6.0.0
+
+# Code quality
+black>=23.0.0
+flake8>=5.0.0
+mypy>=1.0.0
+isort>=5.12.0
+
+# Type checking
+types-PyYAML
+types-requests
+types-python-dateutil
+
+# Development tools
+pre-commit>=2.20.0
