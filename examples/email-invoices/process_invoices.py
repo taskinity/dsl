@@ -12,14 +12,27 @@ import imaplib
 import email
 import email.header
 import logging
+import sys
 from email.utils import parsedate_to_datetime
 from datetime import datetime
 from pathlib import Path
-import pytesseract
-from pdf2image import convert_from_bytes
-import cv2
-import numpy as np
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
+
+# Add shared directory to path
+sys.path.append(str(Path(__file__).parent.parent))
+
+# Import shared utilities
+from shared import load_config
+
+# Third-party imports
+try:
+    import pytesseract
+    from pdf2image import convert_from_bytes
+    import cv2
+    import numpy as np
+    HAS_OCR_DEPS = True
+except ImportError:
+    HAS_OCR_DEPS = False
 
 # Configure logging
 logging.basicConfig(
@@ -29,12 +42,35 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 class EmailInvoiceProcessor:
-    def __init__(self, config: Dict):
-        """Initialize with configuration."""
-        self.config = config
-        self.output_dir = Path(config['output_dir'])
-        self.year = config.get('year', datetime.now().year)
-        self.month = config.get('month', datetime.now().month)
+    def __init__(self, config=None, **kwargs):
+        """Initialize with configuration.
+        
+        Args:
+            config: Optional ConfigLoader instance or dict with configuration
+            **kwargs: Additional configuration overrides
+        """
+        # Initialize configuration
+        if config is None:
+            from shared import load_config
+            self.config = load_config(env_prefix='EMAIL_', **kwargs)
+        elif isinstance(config, dict):
+            from shared import load_config
+            self.config = load_config(env_prefix='EMAIL_', **{**config, **kwargs})
+        else:
+            self.config = config
+            
+        # Set up logging
+        log_level = self.config.get('log_level', 'INFO').upper()
+        logging.basicConfig(
+            level=log_level,
+            format='%(asctime)s - %(levelname)s - %(message)s',
+            filename=self.config.get('log_file')
+        )
+        
+        # Initialize instance variables
+        self.output_dir = Path(self.config.get('output_dir', './output'))
+        self.year = self.config.get_int('year', datetime.now().year)
+        self.month = self.config.get_int('month', datetime.now().month)
         self.supported_extensions = {'.pdf', '.jpg', '.jpeg', '.png'}
         
         # Create output directories
@@ -46,8 +82,16 @@ class EmailInvoiceProcessor:
     def _connect_email(self) -> imaplib.IMAP4_SSL:
         """Connect to the email server."""
         try:
-            mail = imaplib.IMAP4_SSL(self.config['imap_server'], self.config['imap_port'])
-            mail.login(self.config['email'], self.config['password'])
+            server = self.config.get('imap_server')
+            port = self.config.get_int('imap_port', 993)
+            username = self.config.get('username') or self.config.get('email')
+            password = self.config.get('password')
+            
+            if not all([server, username, password]):
+                raise ValueError("Missing required email configuration (server, username, password)")
+                
+            mail = imaplib.IMAP4_SSL(server, port)
+            mail.login(username, password)
             mail.select('inbox')
             logger.info("Successfully connected to email server")
             return mail
@@ -242,17 +286,25 @@ class EmailInvoiceProcessor:
             except:
                 pass
 
-def load_config() -> Dict:
-    """Load configuration from config file."""
-    config_path = Path(__file__).parent / 'config' / 'config.json'
-    with open(config_path, 'r') as f:
-        return json.load(f)
-
 def main():
     """Main function."""
     try:
-        # Load configuration
-        config = load_config()
+        # Load configuration from multiple sources
+        config = load_config(
+            env_path=Path(__file__).parent / '.env',
+            json_path=Path(__file__).parent / 'config' / 'config.json',
+            env_prefix='EMAIL_'
+        )
+        
+        # Set up logging
+        log_level = config.get('log_level', 'INFO').upper()
+        logging.basicConfig(
+            level=log_level,
+            format='%(asctime)s - %(levelname)s - %(message)s',
+            filename=config.get('log_file')
+        )
+        
+        logger.info(f"Starting email invoice processor for {config.get_int('year')}-{config.get_int('month'):02d}")
         
         # Create and run processor
         processor = EmailInvoiceProcessor(config)
