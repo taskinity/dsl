@@ -2,6 +2,7 @@ venv
 venv311
 venv312
 dialogchain.*
+dialogchain-*
 poetry.lock
 # Project specific
 config.json
