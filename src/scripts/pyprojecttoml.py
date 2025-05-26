@@ -66,10 +66,10 @@ ml = [
 camel-router = "camel_router.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/your-org/camel-router"
+Homepage = "https://github.com/taskinity/camel-router"
 Documentation = "https://camel-router.readthedocs.io"
-Repository = "https://github.com/your-org/camel-router"
-Issues = "https://github.com/your-org/camel-router/issues"
+Repository = "https://github.com/taskinity/camel-router"
+Issues = "https://github.com/taskinity/camel-router/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]

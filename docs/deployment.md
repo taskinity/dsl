@@ -27,7 +27,7 @@ This guide covers various deployment options for Camel Router, from local develo
 
 ```bash
 # Clone repository
-git clone https://github.com/your-org/camel-router
+git clone https://github.com/taskinity/camel-router
 cd camel-router
 
 # Install and setup
@@ -881,7 +881,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/your-org/camel-router
+    repoURL: https://github.com/taskinity/camel-router
     targetRevision: main
     path: k8s
   destination:

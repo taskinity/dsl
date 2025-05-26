@@ -25,8 +25,8 @@ This project and everyone participating in it is governed by our [Code of Conduc
 
 Bugs are tracked as [GitHub issues](https://guides.github.com/features/issues/). Before creating a new issue:
 
-1. **Check if the issue has already been reported** by searching under [Issues](https://github.com/your-org/taskinity-dsl/issues).
-2. If you're unable to find an open issue addressing the problem, [open a new one](https://github.com/your-org/taskinity-dsl/issues/new/choose).
+1. **Check if the issue has already been reported** by searching under [Issues](https://github.com/taskinity/taskinity-dsl/issues).
+2. If you're unable to find an open issue addressing the problem, [open a new one](https://github.com/taskinity/taskinity-dsl/issues/new/choose).
 
 A good bug report includes:
 

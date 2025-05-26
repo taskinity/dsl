@@ -255,11 +255,8 @@ with socketserver.TCPServer(('', PORT), Handler) as httpd:\
 # Documentation
 docs:
 	@echo "📚 Generating documentation..."
-	mkdir -p docs
-	python -c "
-import camel_router
-help(camel_router)
-" > docs/api.md
+	@mkdir -p docs
+	@echo "import camel_router\nhelp(camel_router)" | python > docs/api.md
 	@echo "✅ Documentation generated in docs/"
 
 # Deployment helpers

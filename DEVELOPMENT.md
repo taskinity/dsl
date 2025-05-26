@@ -15,7 +15,7 @@ This document provides guidelines and instructions for developers working on the
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-org/taskinity-dsl.git
+   git clone https://github.com/taskinity/taskinity-dsl.git
    cd taskinity-dsl
    ```
 

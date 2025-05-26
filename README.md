@@ -35,7 +35,7 @@
 
 ```bash
 # Clone repository
-git clone https://github.com/your-org/camel-router
+git clone https://github.com/taskinity/camel-router
 cd camel-router
 
 # Quick setup with Makefile
@@ -502,7 +502,7 @@ camel-router validate -c config.yaml
 
 ```bash
 # Clone and setup
-git clone https://github.com/your-org/camel-router
+git clone https://github.com/taskinity/camel-router
 cd camel-router
 make dev
 
@@ -539,4 +539,4 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 **Built with ❤️ for the ML and multimedia processing community**
 
-[⭐ Star us on GitHub](https://github.com/your-org/camel-router) | [📖 Documentation](https://docs.camel-router.org) | [💬 Community](https://discord.gg/camel-router)
+[⭐ Star us on GitHub](https://github.com/taskinity/camel-router) | [📖 Documentation](https://docs.camel-router.org) | [💬 Community](https://discord.gg/camel-router)
