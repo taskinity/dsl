@@ -8,16 +8,19 @@ help:
 	@echo "Camel Router - Multi-language Processing Engine"
 	@echo ""
 	@echo "Available commands:"
-	@echo "  install     - Install the package and dependencies"
-	@echo "  dev         - Install in development mode"
-	@echo "  test        - Run tests"
-	@echo "  lint        - Run linting and format checks"
-	@echo "  clean       - Clean build artifacts"
-	@echo "  build       - Build distribution packages"
-	@echo "  docker      - Build Docker image"
-	@echo "  run-example - Run example camera processing pipeline"
-	@echo "  docs        - Generate documentation"
-	@echo "  setup-env   - Create example .env file"
+	@echo "  install          - Install the package and dependencies"
+	@echo "  dev              - Install in development mode"
+	@echo "  test             - Run tests"
+	@echo "  lint             - Run linting and format checks"
+	@echo "  clean            - Clean build artifacts"
+	@echo "  build            - Build distribution packages"
+	@echo "  docker           - Build Docker image"
+	@echo "  run-example      - Run an example (use EXAMPLE=name)"
+	@echo "  list-examples    - List available examples"
+	@echo "  view-logs        - View logs for running example"
+	@echo "  stop-example     - Stop a running example"
+	@echo "  docs             - Generate documentation"
+	@echo "  setup-env        - Create example .env file"
 
 # Installation
 install:
@@ -95,26 +98,95 @@ setup-env:
 		echo "⚠️  .env file already exists"; \
 	fi
 
+# List available examples
+list-examples:
+	@echo "Available examples:"
+	@echo "  simple  - Basic routing example"
+	@echo "  grpc    - gRPC service integration"
+	@echo "  iot     - IoT device communication"
+	@echo "  camera  - Video processing pipeline"
+
+# Initialize example configurations
 init-camera:
-	camel-router init --template camera --output camera_routes.yaml
+	camel-router init --template camera --output examples/camera_routes.yaml
 	@echo "✅ Camera configuration template created"
-	@echo "📝 Edit camera_routes.yaml and run: make run-camera"
 
 init-grpc:
-	camel-router init --template grpc --output grpc_routes.yaml
+	camel-router init --template grpc --output examples/grpc_routes.yaml
 	@echo "✅ gRPC configuration template created"
 
-run-example: setup-env
-	@echo "🚀 Running camera detection example..."
-	camel-router run -c examples/simple_routes.yaml --verbose
+init-iot:
+	camel-router init --template iot --output examples/iot_routes.yaml
+	@echo "✅ IoT configuration template created"
 
+# Run examples
+run-example: setup-env
+	@if [ -z "$(EXAMPLE)" ]; then \
+		echo "Error: Please specify an example with EXAMPLE=name"; \
+		echo "Available examples: simple, grpc, iot, camera"; \
+		exit 1; \
+	fi
+	@echo "🚀 Starting $(EXAMPLE) example..."
+	@case "$(EXAMPLE)" in \
+		simple) \
+			python -m src.camel_router.cli --config examples/simple_routes.yaml ;; \
+		grpc) \
+			docker-compose -f examples/docker-compose.yml up -d grpc-server && \
+			python -m src.camel_router.cli --config examples/grpc_routes.yaml ;; \
+		iot) \
+			docker-compose -f examples/docker-compose.yml up -d mosquitto && \
+			python -m src.camel_router.cli --config examples/iot_routes.yaml ;; \
+		camera) \
+			python -m src.camel_router.cli --config examples/camera_routes.yaml ;; \
+		*) \
+			echo "Error: Unknown example '$(EXAMPLE)'"; \
+			exit 1 ;; \
+	esac
+
+# View logs for running example
+view-logs:
+	@if [ -z "$(EXAMPLE)" ]; then \
+		echo "Error: Please specify an example with EXAMPLE=name"; \
+		echo "Available examples: simple, grpc, iot, camera"; \
+		exit 1; \
+	fi
+	@case "$(EXAMPLE)" in \
+		grpc|iot) \
+			docker-compose -f examples/docker-compose.yml logs -f ;; \
+		*) \
+			tail -f logs/camel_router.log ;; \
+	esac
+
+# Stop a running example
+stop-example:
+	@if [ -z "$(EXAMPLE)" ]; then \
+		echo "Error: Please specify an example with EXAMPLE=name"; \
+		echo "Available examples: simple, grpc, iot, camera"; \
+		exit 1; \
+	fi
+	@case "$(EXAMPLE)" in \
+		grpc|iot) \
+			docker-compose -f examples/docker-compose.yml down ;; \
+		*) \
+			echo "Example '$(EXAMPLE)' runs in the foreground. Use Ctrl+C to stop." ;; \
+	esac
+
+# Alias for backward compatibility
 run-camera: setup-env
 	@echo "🚀 Running camera processing pipeline..."
-	camel-router run -c camera_routes.yaml --route smart_camera_detection --verbose
+	@make run-example EXAMPLE=camera
 
-run-health:
-	@echo "🚀 Running health check pipeline..."
-	camel-router run -c examples/simple_routes.yaml --route system_health_check --verbose
+run-grpc: setup-env
+	@echo "🚀 Running gRPC example..."
+	@make run-example EXAMPLE=grpc
+
+run-iot: setup-env
+	@echo "🚀 Running IoT example..."
+	@make run-example EXAMPLE=iot
+
+run-simple: setup-env
+	@echo "🚀 Running simple example..."
+	@make run-example EXAMPLE=simple
 
 validate:
 	camel-router validate -c examples/simple_routes.yaml
@@ -162,20 +234,20 @@ logs:
 
 monitor:
 	@echo "📊 Starting monitoring dashboard..."
-	python -c "
-import http.server
-import socketserver
-import webbrowser
-import os
-
-PORT = 8080
-Handler = http.server.SimpleHTTPRequestHandler
-
-os.chdir('monitoring')
-with socketserver.TCPServer(('', PORT), Handler) as httpd:
-    print(f'Monitoring dashboard at http://localhost:{PORT}')
-    webbrowser.open(f'http://localhost:{PORT}')
-    httpd.serve_forever()
+	python -c "\
+import http.server\
+import socketserver\
+import webbrowser\
+import os\
+\
+PORT = 8080\
+Handler = http.server.SimpleHTTPRequestHandler\
+\
+os.chdir('monitoring')\
+with socketserver.TCPServer(('', PORT), Handler) as httpd:\
+    print(f'Monitoring dashboard at http://localhost:{PORT}')\
+    webbrowser.open(f'http://localhost:{PORT}')\
+    httpd.serve_forever()\
 "
 
 # Documentation
