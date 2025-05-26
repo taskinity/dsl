@@ -1,0 +1,69 @@
+[DEFAULT]
+# Ban hosts for one hour (3600 seconds)
+bantime = 3600
+
+# Override /etc/fail2ban/jail.d/00-firewalld.conf
+banaction = iptables-multiport
+banaction_allports = iptables-allports
+
+# Enable monitoring for SSH
+[sshd]
+enabled = true
+port = ssh
+filter = sshd
+logpath = %(sshd_log)s
+maxretry = 5
+findtime = 600
+
+# Enable monitoring for Nginx
+[nginx-http-auth]
+enabled = true
+port = http,https
+filter = nginx-http-auth
+logpath = /var/log/nginx/error.log
+maxretry = 3
+findtime = 600
+
+# Protect against SSH brute force
+[ssh-iptables]
+enabled = true
+filter = sshd
+action = iptables[name=SSH, port=ssh, protocol=tcp]
+logpath = /var/log/auth.log
+maxretry = 5
+findtime = 600
+
+# Protect the server against port scans
+[ssh-ddos]
+enabled = true
+port = ssh
+filter = sshd-ddos
+logpath = %(sshd_log)s
+maxretry = 5
+findtime = 600
+
+# Monitor Docker logs
+[docker]
+enabled = true
+filter = docker
+logpath = /var/log/docker.log
+maxretry = 3
+findtime = 600
+
+# Monitor Nginx 404 errors
+[nginx-botsearch]
+enabled = true
+port = http,https
+filter = nginx-botsearch
+logpath = /var/log/nginx/access.log
+maxretry = 2
+findtime = 600
+
+# Monitor Nginx bad bots
+[nginx-badbots]
+enabled = true
+port = http,https
+filter = nginx-badbots
+logpath = /var/log/nginx/access.log
+maxretry = 2
+findtime = 600

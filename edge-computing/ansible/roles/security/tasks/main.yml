@@ -1,0 +1,72 @@
+---
+# Security hardening tasks
+
+- name: Install security packages
+  apt:
+    name:
+      - fail2ban
+      - ufw
+      - unattended-upgrades
+      - apt-listchanges
+    state: present
+  tags: [security, packages]
+
+- name: Configure automatic security updates
+  copy:
+    src: 20auto-upgrades
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    mode: '0644'
+  tags: [security, updates]
+
+- name: Configure UFW (Uncomplicated Firewall)
+  ufw:
+    rule: "{{ item.rule }}"
+    port: "{{ item.port }}"
+    proto: "{{ item.proto | default('tcp') }}"
+    direction: "{{ item.direction | default('in') }}"
+    state: enabled
+  with_items:
+    - { rule: 'allow', port: '22', proto: 'tcp', description: 'SSH' }
+    - { rule: 'allow', port: '80', proto: 'tcp', description: 'HTTP' }
+    - { rule: 'allow', port: '443', proto: 'tcp', description: 'HTTPS' }
+  notify: reload ufw
+  tags: [security, firewall]
+
+- name: Harden SSH configuration
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: "^#?{{ item.option }}"
+    line: "{{ item.option }} {{ item.value }}"
+    state: present
+    validate: 'sshd -t -f %s'
+  with_items:
+    - { option: 'PermitRootLogin', value: 'no' }
+    - { option: 'PasswordAuthentication', value: 'no' }
+    - { option: 'X11Forwarding', value: 'no' }
+    - { option: 'MaxAuthTries', value: '3' }
+    - { option: 'ClientAliveInterval', value: '300' }
+    - { option: 'ClientAliveCountMax', value: '2' }
+  notify: restart sshd
+  tags: [security, ssh]
+
+- name: Configure fail2ban
+  template:
+    src: jail.local.j2
+    dest: /etc/fail2ban/jail.local
+    mode: '0644'
+  tags: [security, fail2ban]
+  notify: restart fail2ban
+
+- name: Ensure fail2ban is enabled and running
+  systemd:
+    name: fail2ban
+    state: started
+    enabled: yes
+  tags: [security, fail2ban]
+
+- name: Set up log rotation for security logs
+  copy:
+    src: security
+    dest: /etc/logrotate.d/security
+    mode: '0644'
+  tags: [security, logging]
