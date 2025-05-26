@@ -1,0 +1,18 @@
+rtspAddress: :8554
+rtspsAddress: :8322
+rtpAddress: :8000
+rtcpAddress: :8001
+
+# Available protocols
+protocols: [tcp, udp]
+
+authMethods: [basic, digest]
+readTimeout: 10s
+writeTimeout: 10s
+readBufferCount: 512
+
+paths:
+  test:
+    source: publisher
+    sourceOnDemand: true
+    sourceFingerprint: 09:03:39:39:79:77:65:0D:09:88:4F:6F:BC:1A:2D:21:88:09:6F:1F

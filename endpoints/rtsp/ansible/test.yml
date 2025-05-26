@@ -1,0 +1,28 @@
+---
+- name: Test RTSP endpoint
+  hosts: mocks
+  gather_facts: false
+  become: false
+
+  tasks:
+    - name: Install required Python packages
+      pip:
+        name:
+          - opencv-python-headless
+          - numpy
+        state: present
+
+    - name: Test RTSP stream connection
+      script: test_rtsp.py
+      register: rtsp_test
+      changed_when: false
+      failed_when: false
+
+    - name: Show RTSP test result
+      debug:
+        var: rtsp_test.stdout_lines
+
+    - name: Fail if RTSP test failed
+      fail:
+        msg: "RTSP test failed - could not connect to stream"
+      when: rtsp_test.rc != 0

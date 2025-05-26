@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  rtsp-simple-server:
+    image: aler9/rtsp-simple-server:latest
+    container_name: rtsp-simple-server
+    ports:
+      - "8554:8554"  # RTSP port
+      - "1935:1935"  # RTMP port
+      - "8888:8888"  # HTTP port for HLS and metrics
+    volumes:
+      - ./test_video.mp4:/test_video.mp4
+    command: >
+      /mediamtx /test_video.mp4
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8888/v1/config/get"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Optional: FFmpeg service to generate test stream
+  ffmpeg:
+    image: jrottenberg/ffmpeg:4.1
+    container_name: ffmpeg-test-stream
+    depends_on:
+      rtsp-simple-server:
+        condition: service_healthy
+    volumes:
+      - ./test_video.mp4:/test_video.mp4
+    command: >
+      -re -stream_loop -1 -i /test_video.mp4
+      -c:v libx264 -preset ultrafast -tune zerolatency -b:v 900k -f rtsp rtsp://rtsp-simple-server:8554/mystream
+    restart: unless-stopped

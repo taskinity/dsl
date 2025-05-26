@@ -1,0 +1,58 @@
+---
+- name: Test HTTP endpoint
+  hosts: mocks
+  gather_facts: false
+  become: false
+
+  tasks:
+    - name: Test HTTP endpoint availability
+      uri:
+        url: "http://localhost:8080/"
+        method: GET
+        status_code: 200
+        body_format: json
+      register: http_test
+      retries: 3
+      delay: 1
+      until: http_test.status == 200
+
+    - name: Test GET /api/data endpoint
+      uri:
+        url: "http://localhost:8080/api/data"
+        method: GET
+        status_code: 200
+        body_format: json
+      register: api_data
+
+    - name: Show API response
+      debug:
+        var: api_data.json
+
+    - name: Test POST /api/echo endpoint
+      uri:
+        url: "http://localhost:8080/api/echo"
+        method: POST
+        headers:
+          Content-Type: application/json
+        body_format: json
+        body:
+          message: "Hello, World!"
+        status_code: 200
+      register: echo_test
+
+    - name: Show echo response
+      debug:
+        var: echo_test.json
+
+    - name: Test error responses
+      uri:
+        url: "http://localhost:8080/api/status/404"
+        method: GET
+        status_code: 404
+        body_format: json
+      register: error_test
+      ignore_errors: yes
+
+    - name: Show error response
+      debug:
+        var: error_test.json

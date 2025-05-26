@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  rtsp-server:
+    build: ./rtsp/docker
+    container_name: rtsp-mock
+    ports:
+      - "8554:8554"  # RTSP
+      - "8888:8888"  # HTTP
+    restart: unless-stopped
+    networks:
+      - mock-network
+
+  http-server:
+    build: ./http/docker
+    container_name: http-mock
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    networks:
+      - mock-network
+
+  webrtc-server:
+    build: ./webrtc/docker
+    container_name: webrtc-mock
+    ports:
+      - "8443:8443"
+    restart: unless-stopped
+    networks:
+      - mock-network
+
+  grpc-server:
+    build: ./grpc/docker
+    container_name: grpc-mock
+    ports:
+      - "50051:50051"
+    restart: unless-stopped
+    networks:
+      - mock-network
+
+  mqtt-broker:
+    build: ./mqtt/docker
+    container_name: mqtt-mock
+    ports:
+      - "1883:1883"  # MQTT
+      - "9001:9001"  # MQTT over WebSocket
+    restart: unless-stopped
+    networks:
+      - mock-network
+
+networks:
+  mock-network:
+    driver: bridge

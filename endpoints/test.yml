@@ -1,0 +1,26 @@
+---
+- name: Test Mock Endpoints
+  hosts: mocks
+  gather_facts: true
+  become: false
+
+  tasks:
+    - name: Include RTSP tests
+      include_tasks: rtsp/ansible/test.yml
+      tags: rtsp
+
+    - name: Include HTTP tests
+      include_tasks: http/ansible/test.yml
+      tags: http
+
+    - name: Include WebRTC tests
+      include_tasks: webrtc/ansible/test.yml
+      tags: webrtc
+
+    - name: Include gRPC tests
+      include_tasks: grpc/ansible/test.yml
+      tags: grpc
+
+    - name: Include MQTT tests
+      include_tasks: mqtt/ansible/test.yml
+      tags: mqtt
