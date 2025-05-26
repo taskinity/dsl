@@ -1,4 +1,4 @@
-.PHONY: help build test clean all
+.PHONY: help build test clean all test-grpc
 
 # Default target
 help:
@@ -28,6 +28,10 @@ down:
 # Test all endpoints
 test:
 	ansible-playbook -i inventory.ini test.yml
+
+# Test gRPC endpoint
+test-grpc:
+	$(MAKE) -C grpc test
 
 # Clean up all endpoints
 clean:

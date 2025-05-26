@@ -1,0 +1,68 @@
+---
+# Backup configuration and tasks
+
+- name: Create backup directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  with_items:
+    - "{{ backup_dir }}"
+    - "{{ backup_dir }}/daily"
+    - "{{ backup_dir }}/weekly"
+    - "{{ backup_dir }}/monthly"
+  tags: [backup, directories]
+
+- name: Install backup dependencies
+  apt:
+    name:
+      - rsync
+      - borgbackup
+      - python3-borgbackup
+    state: present
+  tags: [backup, packages]
+
+- name: Create backup script
+  template:
+    src: backup.sh.j2
+    dest: /usr/local/bin/backup-edge
+    mode: '0755'
+  tags: [backup, scripts]
+
+- name: Configure logrotate for backups
+  copy:
+    src: backup-logrotate
+    dest: /etc/logrotate.d/backup-edge
+    mode: '0644'
+  tags: [backup, config]
+
+- name: Create cron job for daily backups
+  cron:
+    name: "Daily backup of edge services"
+    hour: "2"
+    minute: "0"
+    job: "/usr/local/bin/backup-edge daily"
+    user: root
+  tags: [backup, cron]
+
+- name: Create cron job for weekly backups
+  cron:
+    name: "Weekly backup of edge services"
+    weekday: "0"
+    hour: "3"
+    minute: "0"
+    job: "/usr/local/bin/backup-edge weekly"
+    user: root
+  tags: [backup, cron]
+
+- name: Create cron job for monthly backups
+  cron:
+    name: "Monthly backup of edge services"
+    day: "1"
+    hour: "4"
+    minute: "0"
+    job: "/usr/local/bin/backup-edge monthly"
+    user: root
+  tags: [backup, cron]

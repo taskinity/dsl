@@ -33,10 +33,16 @@ services:
     build: ./grpc/docker
     container_name: grpc-mock
     ports:
-      - "50051:50051"
+      - "50051:50051"  # gRPC
+      - "8000:8000"    # Prometheus metrics
     restart: unless-stopped
     networks:
       - mock-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import grpc; channel = grpc.insecure_channel('localhost:50051'); import example_pb2, example_pb2_grpc; stub = example_pb2_grpc.GreeterStub(channel); response = stub.SayHello(example_pb2.HelloRequest(name='healthcheck'), timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   mqtt-broker:
     build: ./mqtt/docker

@@ -1,0 +1,65 @@
+---
+- name: Test gRPC Service
+  hosts: mocks
+  gather_facts: false
+  become: false
+
+  tasks:
+    - name: Check if Docker is running
+      command: docker info
+      register: docker_check
+      changed_when: false
+      ignore_errors: true
+
+    - name: Fail if Docker is not running
+      fail:
+        msg: "Docker is not running. Please start Docker and try again."
+      when: docker_check.rc != 0
+
+    - name: Build gRPC service
+      command: make build
+      args:
+        chdir: /home/tom/github/taskinity/dsl/endpoints/grpc
+      register: build_result
+      changed_when: "'Successfully built' in build_result.stdout"
+
+    - name: Start gRPC service
+      command: make docker-run
+      args:
+        chdir: /home/tom/github/taskinity/dsl/endpoints/grpc
+      async: 60
+      poll: 0
+      register: grpc_service
+
+    - name: Wait for gRPC service to be ready
+      wait_for:
+        port: 50051
+        timeout: 30
+
+    - name: Test gRPC service
+      command: ./test_grpc.sh
+      args:
+        chdir: /home/tom/github/taskinity/dsl/endpoints/grpc
+      register: test_result
+      changed_when: false
+
+    - name: Display test results
+      debug:
+        var: test_result.stdout_lines
+
+    - name: Stop gRPC service
+      command: make docker-stop
+      args:
+        chdir: /home/tom/github/taskinity/dsl/endpoints/grpc
+      ignore_errors: true
+
+    - name: Remove gRPC container
+      command: make docker-rm
+      args:
+        chdir: /home/tom/github/taskinity/dsl/endpoints/grpc
+      ignore_errors: true
+
+    - name: Fail if tests failed
+      fail:
+        msg: "gRPC tests failed"
+      when: test_result.rc != 0

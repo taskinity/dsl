@@ -1,0 +1,100 @@
+#!/bin/bash
+
+# Backup script for edge computing services
+# Usage: backup.sh [daily|weekly|monthly]
+
+set -euo pipefail
+
+# Configuration
+BACKUP_ROOT="{{ backup_dir }}"
+RETENTION_DAYS={{ retention_days }}
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+BACKUP_TYPE=${1:-daily}
+
+# Directories to back up
+BACKUP_DIRS=(
+  "/opt/portainer/data"
+  "/opt/gitea/data"
+  "/opt/nodered/data"
+  "/opt/monitoring/influxdb"
+  "/opt/monitoring/grafana"
+  "/etc/docker/compose"
+)
+
+# Logging
+LOG_FILE="/var/log/backup-edge-${BACKUP_TYPE}.log"
+exec > >(tee -a "${LOG_FILE}") 2>&1
+
+# Create backup directory
+BACKUP_DIR="${BACKUP_ROOT}/${BACKUP_TYPE}"
+mkdir -p "${BACKUP_DIR}"
+
+echo "[$(date)] Starting ${BACKUP_TYPE} backup..."
+
+# Stop containers before backup
+echo "Stopping containers..."
+for service in portainer gitea nodered monitoring; do
+  if [ -f "/etc/docker/compose/${service}/docker-compose.yml" ]; then
+    docker-compose -f "/etc/docker/compose/${service}/docker-compose.yml" down || true
+  fi
+done
+
+# Create backup for each directory
+for dir in "${BACKUP_DIRS[@]}"; do
+  if [ -d "${dir}" ]; then
+    dir_name=$(basename "${dir}")
+    backup_file="${BACKUP_DIR}/${dir_name}_${TIMESTAMP}.tar.gz"
+    
+    echo "Backing up ${dir}..."
+    tar -czf "${backup_file}" -C "$(dirname "${dir}")" "$(basename "${dir}")" \
+      --exclude='*.tmp' \
+      --exclude='*.log' \
+      --exclude='*.swp' \
+      --exclude='*.sock' \
+      --exclude='*.pid' \
+      --exclude='*cache*' \
+      --exclude='*tmp*'
+    
+    # Set proper permissions
+    chmod 600 "${backup_file}"
+    chown root:root "${backup_file}"
+  fi
+done
+
+# Start containers after backup
+echo "Starting containers..."
+for service in portainer gitea nodered monitoring; do
+  if [ -f "/etc/docker/compose/${service}/docker-compose.yml" ]; then
+    docker-compose -f "/etc/docker/compose/${service}/docker-compose.yml" up -d || true
+  fi
+done
+
+# Clean up old backups
+echo "Cleaning up old backups..."
+find "${BACKUP_ROOT}/${BACKUP_TYPE}" -type f -name "*.tar.gz" -mtime +${RETENTION_DAYS} -delete -print
+
+# For weekly and monthly, also clean up old daily backups
+if [ "${BACKUP_TYPE}" != "daily" ]; then
+  find "${BACKUP_ROOT}/daily" -type f -name "*.tar.gz" -mtime +${RETENTION_DAYS} -delete -print
+fi
+
+# For monthly, also clean up old weekly backups
+if [ "${BACKUP_TYPE}" == "monthly" ]; then
+  find "${BACKUP_ROOT}/weekly" -type f -name "*.tar.gz" -mtime +90 -delete -print
+fi
+
+echo "[$(date)] Backup completed successfully"
+
+# Create a checksum file for verification
+find "${BACKUP_DIR}" -type f -name "*_${TIMESTAMP}.tar.gz" -exec sha256sum {} \; > "${BACKUP_DIR}/checksums_${TIMESTAMP}.txt"
+
+# Sync to remote storage if configured
+if [ -f "/root/.backup-remote" ]; then
+  echo "Syncing to remote storage..."
+  source "/root/.backup-remote"
+  if [ -n "${REMOTE_BACKUP_SERVER}" ] && [ -n "${REMOTE_BACKUP_PATH}" ]; then
+    rsync -avz --delete "${BACKUP_ROOT}/" "${REMOTE_BACKUP_SERVER}:${REMOTE_BACKUP_PATH}/"
+  fi
+fi
+
+exit 0

@@ -7,7 +7,7 @@ This directory contains mock implementations of various protocol endpoints for t
 1. **RTSP Server** - Mock RTSP video streaming server
 2. **HTTP Server** - Mock HTTP/HTTPS REST API server
 3. **WebRTC Server** - Mock WebRTC signaling server (TODO)
-4. **gRPC Server** - Mock gRPC service (TODO)
+4. **gRPC Server** - Mock gRPC service with support for unary and streaming RPCs
 5. **MQTT Broker** - Mock MQTT message broker (TODO)
 
 ## Quick Start
@@ -52,6 +52,20 @@ This directory contains mock implementations of various protocol endpoints for t
   - `GET /api/status/{code}` - Return specified status code
 - **Build**: `make -C http build`
 - **Test**: `make -C http test`
+
+### gRPC Server
+
+- **Port**: 50051 (gRPC), 8000 (Prometheus metrics)
+- **Service**: `example.Greeter`
+- **Methods**:
+  - `SayHello` - Simple unary RPC
+  - `StreamData` - Server streaming RPC
+  - `ClientStream` - Client streaming RPC
+  - `BidirectionalStream` - Bidirectional streaming RPC
+- **Build**: `make -C grpc build`
+- **Test**: `make -C grpc test` or `make test-grpc`
+- **Metrics**: `http://localhost:8000/metrics`
+- **Test Client**: `python docker/client.py`
 
 ## Testing with Ansible
 
