@@ -3,7 +3,7 @@ Tests for connectors (sources and destinations)
 """
 import pytest
 import asyncio
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import Mock, patch, AsyncMock, mock_open
 from dialogchain.connectors import (
     TimerSource, FileSource, EmailDestination, 
     HTTPDestination, LogDestination
@@ -122,8 +122,10 @@ class TestLogDestination:
         dest = LogDestination('log://test.log')
         
         with patch('builtins.open', mock_open()) as mock_file:
-            await dest.send('test message')
-            mock_file.assert_called_once_with('test.log', 'a')
+            with patch('os.path.exists', return_value=True):
+                await dest.send('test message')
+                mock_file.assert_called_once_with('test.log', 'a')
+                mock_file().write.assert_called_once_with('test message\n')
 
 @pytest.mark.integration
 class TestConnectorIntegration:

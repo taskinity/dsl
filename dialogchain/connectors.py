@@ -260,20 +260,28 @@ class FileDestination(Destination):
 
 
 class LogDestination(Destination):
-    """Console log destination"""
+    """Log destination for both console and file logging"""
 
     def __init__(self, uri: str):
         parsed = urlparse(uri)
-        self.log_file = parsed.path if parsed.path else None
+        # Remove leading slash from path if present
+        self.log_file = parsed.path.lstrip('/') if parsed.path else None
+        if self.log_file == '':
+            self.log_file = None
 
     async def send(self, message: Any) -> None:
-        """Log message"""
+        """Log message to console and optionally to a file"""
         log_msg = f"📝 {datetime.now().isoformat()}: {message}"
         print(log_msg)
 
         if self.log_file:
             try:
-                with open(self.log_file, 'a') as f:
+                # Ensure directory exists
+                log_dir = os.path.dirname(self.log_file)
+                if log_dir and not os.path.exists(log_dir):
+                    os.makedirs(log_dir, exist_ok=True)
+                    
+                with open(self.log_file, 'a', encoding='utf-8') as f:
                     f.write(log_msg + "\n")
             except Exception as e:
                 print(f"❌ Log file error: {e}")
