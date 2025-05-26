@@ -1,0 +1,31 @@
+---
+# Common variables for all hosts
+
+# Project settings
+project_root: "{{ lookup('env', 'PWD') }}"
+python_version: 3.8
+
+# Email processor settings
+email_server: imap.example.com
+email_port: 993
+email_user: your-email@example.com
+email_password: your-password
+email_folder: INBOX
+processed_folder: Processed
+error_folder: Errors
+output_dir: "{{ project_root }}/output"
+log_level: INFO
+tesseract_cmd: /usr/bin/tesseract
+ocr_languages: eng,pol
+
+# Web processor settings
+aws_access_key_id: your_access_key
+aws_secret_access_key: your_secret_key
+aws_region: us-east-1
+
+google_application_credentials: /path/to/credentials.json
+
+azure_subscription_id: your_subscription_id
+azure_tenant_id: your_tenant_id
+azure_client_id: your_client_id
+azure_client_secret: your_client_secret

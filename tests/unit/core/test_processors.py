@@ -3,17 +3,33 @@ Unit tests for processor classes.
 """
 import pytest
 import asyncio
-from unittest.mock import patch, MagicMock, AsyncMock
+import subprocess
+from unittest.mock import patch, MagicMock, AsyncMock, ANY
 import json
 from datetime import datetime
+
+# Add this at the top of the file to avoid import errors
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../src')))
 
 # Test the base Processor class
 def test_processor_abstract_class():
     """Test that Processor is an abstract base class."""
     from camel_router.processors import Processor
     
+    # Test that we can't instantiate the abstract class
     with pytest.raises(TypeError):
-        Processor()  # Can't instantiate abstract class
+        Processor()
+    
+    # Test that the abstract method is required
+    class TestProcessor(Processor):
+        async def process(self, message):
+            return message
+    
+    # Should be able to instantiate a concrete implementation
+    processor = TestProcessor()
+    assert processor is not None
 
 # Test ExternalProcessor
 class TestExternalProcessor:
@@ -26,7 +42,8 @@ class TestExternalProcessor:
             'input_format': 'json',
             'output_format': 'json',
             'async': False,
-            'timeout': 10
+            'timeout': 10,
+            'config': {}  # Add default empty config
         }
     
     @pytest.fixture
@@ -40,7 +57,13 @@ class TestExternalProcessor:
         test_input = {"test": "data"}
         expected_output = {"result": "processed"}
         
-        with patch('subprocess.run') as mock_run:
+        with patch('subprocess.run') as mock_run, \
+             patch('tempfile.NamedTemporaryFile') as mock_temp_file:
+            # Mock the temporary file
+            mock_file = MagicMock()
+            mock_file.name = "/tmp/tempfile123"
+            mock_temp_file.return_value.__enter__.return_value = mock_file
+            
             # Mock subprocess run result
             mock_result = MagicMock()
             mock_result.returncode = 0
@@ -53,11 +76,13 @@ class TestExternalProcessor:
             # Assert the result
             assert result == expected_output
             mock_run.assert_called_once()
+            mock_file.write.assert_called_once_with(json.dumps(test_input).encode())
     
     @pytest.mark.asyncio
     async def test_process_error(self, processor):
         """Test error handling in external command execution."""
-        with patch('subprocess.run') as mock_run:
+        with patch('subprocess.run') as mock_run, \
+             patch('tempfile.NamedTemporaryFile'):
             mock_run.side_effect = subprocess.CalledProcessError(1, 'cmd')
             
             result = await processor.process({"test": "data"})
@@ -71,7 +96,8 @@ class TestFilterProcessor:
     def processor(self):
         from camel_router.processors import FilterProcessor
         return FilterProcessor({
-            'condition': 'value > 10 and name == "test"'
+            'condition': 'value > 10 and name == "test"',
+            'config': {}  # Add default empty config
         })
     
     @pytest.mark.asyncio
@@ -94,7 +120,8 @@ class TestTransformProcessor:
         from camel_router.processors import TransformProcessor
         return TransformProcessor({
             'template': 'Processed: {{name}} with value {{value}}',
-            'output_field': 'transformed'
+            'output_field': 'transformed',
+            'config': {}  # Add default empty config
         })
     
     @pytest.mark.asyncio
@@ -115,13 +142,20 @@ class TestAggregateProcessor:
     """Test cases for AggregateProcessor."""
     
     @pytest.fixture
-    def processor(self):
+    def processor(self, event_loop):
         from camel_router.processors import AggregateProcessor
         return AggregateProcessor({
             'strategy': 'collect',
             'timeout': '1s',
-            'max_size': 3
+            'max_size': 3,
+            'config': {}  # Add default empty config
         })
+        
+    @pytest.fixture
+    def event_loop(self):
+        loop = asyncio.new_event_loop()
+        yield loop
+        loop.close()
     
     @pytest.mark.asyncio
     async def test_aggregate_collect(self, processor):
@@ -164,7 +198,8 @@ class TestDebugProcessor:
     def processor(self):
         from camel_router.processors import DebugProcessor
         return DebugProcessor({
-            'prefix': 'TEST_DEBUG'
+            'prefix': 'TEST_DEBUG',
+            'config': {}  # Add default empty config
         })
     
     @pytest.mark.asyncio

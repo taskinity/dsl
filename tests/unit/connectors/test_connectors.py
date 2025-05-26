@@ -152,22 +152,31 @@ class TestLogDestination:
         assert "test log" in captured.out
 
 # Test Connector Factory
-def test_get_connector():
+def test_connector_factory():
     """Test the connector factory function."""
-    # Import inside the test to avoid import errors
-    from camel_router.connectors import get_connector, RTSPSource, HTTPDestination, FileDestination, LogDestination
+    from camel_router.connectors import RTSPSource, HTTPDestination, FileDestination, LogDestination
+    from camel_router.engine import CamelRouterEngine
+    
+    # Create a test engine
+    engine = CamelRouterEngine({"routes": []})
     
     # Test source connectors
-    rtsp_source = get_connector("rtsp://test")
+    rtsp_source = engine.create_source("rtsp://test")
     assert isinstance(rtsp_source, RTSPSource)
     
     # Test destination connectors
-    http_dest = get_connector("http://example.com")
+    http_dest = engine.create_destination("http://example.com")
     assert isinstance(http_dest, HTTPDestination)
     
-    file_dest = get_connector("file:///tmp/test.txt")
-    assert file_dest.__class__.__name__ == "FileDestination"
+    file_dest = engine.create_destination("file:///tmp/test.txt")
+    assert isinstance(file_dest, FileDestination)
+    
+    log_dest = engine.create_destination("log:test")
+    assert isinstance(log_dest, LogDestination)
     
     # Test invalid connector
-    with pytest.raises(ValueError, match="Unsupported connector type"):
-        get_connector("invalid://test")
+    with pytest.raises(ValueError, match="Unsupported source type"):
+        engine.create_source("invalid://test")
+        
+    with pytest.raises(ValueError, match="Unsupported destination type"):
+        engine.create_destination("invalid://test")

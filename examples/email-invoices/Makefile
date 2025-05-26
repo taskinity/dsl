@@ -1,4 +1,4 @@
-.PHONY: help setup install test run clean
+.PHONY: help setup install test run clean lint format typecheck
 
 # Project variables
 PROJECT_NAME = email-invoice-processor
@@ -11,6 +11,7 @@ PYTEST = $(VENV)/bin/pytest
 FLAKE8 = $(VENV)/bin/flake8
 BLACK = $(VENV)/bin/black
 ISORT = $(VENV)/bin/isort
+MYPY = $(VENV)/bin/mypy
 
 # Help message
 help:
@@ -21,6 +22,7 @@ help:
 	@echo "  make install      - Install the package in development mode"
 	@echo "  make test         - Run tests"
 	@echo "  make lint         - Run code style checks"
+	@echo "  make typecheck    - Run type checking"
 	@echo "  make format       - Format the code"
 	@echo "  make run          - Run the email processor"
 	@echo "  make clean        - Clean up temporary files"
@@ -39,7 +41,7 @@ venv:
 		$(PIP) install --upgrade pip; \
 	fi
 
-# Install the package
+# Install the package in development mode
 install:
 	$(PIP_VENV) install -e .
 
@@ -49,9 +51,32 @@ test:
 
 # Run code style checks
 lint:
-	$(FLAKE8 email_processor/
-	$(BLACK) --check email_processor/ tests/
-	$(ISORT) --check-only email_processor/ tests/
+	$(FLAKE8) email_processor tests
+	$(BLACK) --check email_processor tests
+	$(ISORT) --check-only email_processor tests
+
+# Run type checking
+typecheck:
+	$(MYPY) email_processor
+
+# Format the code
+format:
+	$(BLACK) email_processor tests
+	$(ISORT) email_processor tests
+
+# Run the email processor
+run:
+	$(PYTHON) -m email_processor --config process_invoices.yaml
+
+# Clean up
+clean:
+	find . -type d -name '__pycache__' -exec rm -rf {} +
+	find . -type f -name '*.pyc' -delete
+	find . -type f -name '*.pyo' -delete
+	find . -type d -name '.mypy_cache' -exec rm -rf {} +
+	find . -type d -name '.pytest_cache' -exec rm -rf {} +
+	find . -type d -name '.coverage' -delete
+	find . -type d -name 'htmlcov' -exec rm -rf {} +
 
 # Format the code
 format:

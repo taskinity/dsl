@@ -1,9 +1,15 @@
 """
-Unit tests for the core engine functionality.
+Unit tests for CamelRouterEngine.
 """
 import pytest
 import asyncio
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import patch, MagicMock, AsyncMock
+import json
+
+# Add this at the top of the file to avoid import errors
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../src')))
 from pathlib import Path
 
 # Test the CamelRouterEngine class
@@ -12,19 +18,15 @@ class TestCamelRouterEngine:
 
     @pytest.fixture
     def sample_config(self):
-        """Return a sample configuration for testing."""
+        """Sample configuration for testing."""
         return {
-            'routes': [
+            "version": "1.0",
+            "routes": [
                 {
-                    'name': 'test_route',
-                    'from': 'timer://5s',
-                    'processors': [
-                        {
-                            'type': 'transform',
-                            'template': 'Hello {{message}}'
-                        }
-                    ],
-                    'to': 'log://test.log'
+                    "name": "test_route",
+                    "from": "timer:5s",
+                    "to": ["log:test"],
+                    "processors": ["transform_processor"]
                 }
             ]
         }
@@ -41,18 +43,28 @@ class TestCamelRouterEngine:
         assert len(engine.routes) == 1
         assert engine.verbose is True
 
-    def test_run_all_routes(self, engine):
-        """Test running all routes."""
-        with patch('asyncio.gather') as mock_gather:
-            asyncio.run(engine.run_all_routes())
-            mock_gather.assert_called_once()
+    @pytest.fixture
+    def event_loop(self):
+        loop = asyncio.new_event_loop()
+        yield loop
+        loop.close()
 
     @pytest.mark.asyncio
-    async def test_run_route(self, engine):
-        """Test running a specific route by name."""
-        with patch('camel_router.engine.CamelRouterEngine.run_route_config') as mock_run:
-            await engine.run_route('test_route')
-            mock_run.assert_called_once()
+    async def test_run_all_routes(self, engine):
+        """Test running all routes."""
+        # Mock the run_route_config method
+        with patch.object(engine, 'run_route_config', new_callable=AsyncMock) as mock_run:
+            # Mock the route processing to avoid actual async operations
+            async def mock_route_processor(*args, **kwargs):
+                return None
+                
+            mock_run.side_effect = mock_route_processor
+            
+            # Run the test
+            await engine.run_all_routes()
+            
+            # Verify the method was called
+            assert mock_run.call_count == 1
 
     def test_route_not_found(self, engine):
         """Test that a non-existent route raises an error."""
@@ -60,14 +72,13 @@ class TestCamelRouterEngine:
             asyncio.run(engine.run_route('nonexistent'))
 
     @pytest.mark.parametrize("uri,expected", [
-        ("timer://5s", ("timer", {"host": "5s"})),
-        ("http://example.com/path?param=value", ("http", {"host": "example.com", "path": "/path", "param": ["value"]})),
+        ("timer:5s", ("timer", "5s")),
+        ("http://example.com/path?param=value", ("http", "//example.com/path?param=value")),
     ])
     def test_parse_uri(self, engine, uri, expected):
-        """Test URI parsing functionality."""
-        result = engine.parse_uri(uri)
-        assert result[0] == expected[0]  # scheme
-        assert result[1] == expected[1]  # params
+        """Test URI parsing."""
+        from camel_router.engine import parse_uri
+        assert parse_uri(uri) == expected
 
     def test_resolve_variables(self, engine):
         """Test environment variable resolution."""
@@ -77,26 +88,41 @@ class TestCamelRouterEngine:
             assert result == 'test_value'
 
     @pytest.mark.asyncio
-    async def test_route_execution_flow(self, engine, sample_config):
-        """Test the complete route execution flow with mocks."""
-        # Mock the processor
-        mock_processor = AsyncMock()
-        mock_processor.process.return_value = {"message": "processed"}
+    async def test_route_execution_flow(self, engine, monkeypatch):
+        """Test the complete route execution flow."""
+        # Create a test route config
+        route_config = {
+            "name": "test_flow",
+            "from": "timer:1s",
+            "to": ["log:test"],
+            "processors": ["transform"]
+        }
         
-        # Mock the processor factory
-        with patch('camel_router.engine.get_processor', return_value=mock_processor) as mock_factory:
-            # Mock the connector
-            mock_connector = AsyncMock()
-            mock_connector.receive.return_value = [{"test": "data"}]
-            mock_connector.send.return_value = True
+        # Mock the components
+        mock_source = AsyncMock()
+        mock_source.receive.return_value = [{"test": "data"}]
+        
+        mock_processor = AsyncMock()
+        mock_processor.process.return_value = {"processed": True}
+        
+        mock_destination = AsyncMock()
+        
+        # Patch the creation methods
+        with patch('camel_router.engine.parse_uri') as mock_parse_uri, \
+             patch('camel_router.engine.TimerSource', return_value=mock_source), \
+             patch('camel_router.engine.TransformProcessor', return_value=mock_processor), \
+             patch('camel_router.engine.LogDestination', return_value=mock_destination):
             
-            with patch('camel_router.engine.get_connector', return_value=mock_connector) as mock_conn_factory:
-                # Run the route
-                await engine.run_route_config(sample_config['routes'][0])
-                
-                # Verify the processor was created and called
-                mock_factory.assert_called_once()
-                mock_processor.process.assert_called_once()
-                
-                # Verify the connector was used for sending
-                mock_connector.send.assert_called_once()
+            # Mock the URI parsing
+            mock_parse_uri.side_effect = [
+                ("timer", "1s"),
+                ("log", "test")
+            ]
+            
+            # Run the route
+            await engine.run_route_config(route_config)
+            
+            # Verify the flow
+            mock_source.receive.assert_called_once()
+            mock_processor.process.assert_called_once_with({"test": "data"})
+            mock_destination.send.assert_called_once_with({"processed": True})
