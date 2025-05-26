@@ -1,4 +1,4 @@
-.PHONY: help setup install test run clean lint format typecheck
+.PHONY: help setup install test run clean lint format typecheck dev-requirements
 
 # Project variables
 PROJECT_NAME = email-invoice-processor
@@ -28,7 +28,7 @@ help:
 	@echo "  make clean        - Clean up temporary files"
 
 # Setup development environment
-setup: venv
+setup: venv requirements-dev.txt
 	$(PIP_VENV) install -U pip setuptools wheel
 	$(PIP_VENV) install -r requirements-dev.txt
 	$(PIP_VENV) install -e .
@@ -77,24 +77,10 @@ clean:
 	find . -type d -name '.pytest_cache' -exec rm -rf {} +
 	find . -type d -name '.coverage' -delete
 	find . -type d -name 'htmlcov' -exec rm -rf {} +
+	find . -type d -name '*.egg-info' -exec rm -rf {} +
+	docker-compose down -v 2>/dev/null || true
 
-# Format the code
-format:
-	$(BLACK) email_processor/ tests/
-	$(ISORT) email_processor/ tests/
-
-# Run the email processor
-run:
-	$(PYTHON_VENV) process_invoices.py
-
-# Clean up
-clean:
-	find . -type d -name "__pycache__" -exec rm -r {} \; || true
-	find . -type d -name "*.egg-info" -exec rm -r {} \; || true
-	find . -type d -name ".pytest_cache" -exec rm -r {} \; || true
-	find . -type d -name ".mypy_cache" -exec rm -r {} \; || true
-	docker-compose down -v || true
-
+# Generate development requirements
 dev-requirements: requirements-dev.txt
 
 requirements-dev.txt: requirements.txt

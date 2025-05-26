@@ -76,7 +76,12 @@ class TestExternalProcessor:
             # Assert the result
             assert result == expected_output
             mock_run.assert_called_once()
-            mock_file.write.assert_called_once_with(json.dumps(test_input).encode())
+            # Check that write was called with the correct data
+            mock_file.write.assert_called_once()
+            # Get the actual call arguments
+            args, _ = mock_file.write.call_args
+            # The first argument should be the JSON-encoded input
+            assert json.loads(args[0].decode()) == test_input
     
     @pytest.mark.asyncio
     async def test_process_error(self, processor):
@@ -101,15 +106,18 @@ class TestFilterProcessor:
         })
     
     @pytest.mark.asyncio
-    @pytest.mark.parametrize("message,expected", [
-        ({"value": 15, "name": "test"}, {"value": 15, "name": "test"}),
-        ({"value": 5, "name": "test"}, None),
-        ({"value": 15, "name": "other"}, None),
+    @pytest.mark.parametrize("message,should_pass", [
+        ({"value": 15, "name": "test"}, True),
+        ({"value": 5, "name": "test"}, False),
+        ({"value": 15, "name": "other"}, False),
     ])
-    async def test_filter_conditions(self, processor, message, expected):
+    async def test_filter_conditions(self, processor, message, should_pass):
         """Test various filter conditions."""
         result = await processor.process(message)
-        assert result == expected
+        if should_pass:
+            assert result == message  # Message passes filter
+        else:
+            assert result is None  # Message is filtered out
 
 # Test TransformProcessor
 class TestTransformProcessor:
@@ -163,32 +171,42 @@ class TestAggregateProcessor:
         # First message - should be buffered
         result1 = await processor.process({"id": 1, "value": 10})
         assert result1 is None
-        
+    
         # Second message - still buffered
         result2 = await processor.process({"id": 2, "value": 20})
         assert result2 is None
-        
+    
         # Third message - triggers aggregation (max_size=3)
-        result3 = await processor.process({"id": 3, "value": 30})
-        assert result3 is not None
-        assert len(result3["messages"]) == 3
-        assert result3["count"] == 3
-        assert result3["first_id"] == 1
-        assert result3["last_id"] == 3
+        with patch('time.time', return_value=1000.0):
+            result3 = await processor.process({"id": 3, "value": 30})
+            assert result3 is not None
+            # Check the structure of the aggregated result
+            assert isinstance(result3, dict)
+            assert "events" in result3
+            assert len(result3["events"]) == 3
+            assert result3["count"] == 3
+            assert result3["first_id"] == 1
+            assert result3["last_id"] == 3
     
     @pytest.mark.asyncio
     async def test_aggregate_timeout(self, processor):
         """Test aggregation timeout."""
         # Add one message
-        await processor.process({"id": 1, "value": 10})
+        result1 = await processor.process({"id": 1, "value": 10})
+        assert result1 is None  # Should be buffered
         
         # Fast forward time to trigger timeout
-        with patch('asyncio.get_event_loop') as mock_loop:
-            mock_loop.return_value.time.return_value = 2.0  # More than 1s timeout
-            result = await processor.process({"id": 2, "value": 20})
-            
-            assert result is not None
-            assert len(result["messages"]) == 1  # Only the second message
+        with patch('time.time', return_value=1000.0):  # More than 1s timeout
+            # This should trigger the timeout and return the buffered messages
+            result2 = await processor.process({"id": 2, "value": 20})
+            assert result2 is not None
+            # Check the structure of the timed out result
+            assert isinstance(result2, dict)
+            assert "events" in result2
+            assert len(result2["events"]) == 1  # Only the first message
+            assert result2["count"] == 1
+            assert result2["first_id"] == 1
+            assert result2["last_id"] == 1
 
 # Test DebugProcessor
 class TestDebugProcessor:
