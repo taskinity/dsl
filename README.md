@@ -6,6 +6,8 @@
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
+[![Tests](https://github.com/dialogchain/python/actions/workflows/tests.yml/badge.svg)](https://github.com/dialogchain/python/actions/workflows/tests.yml)
+[![codecov](https://codecov.io/gh/dialogchain/python/graph/badge.svg?token=YOUR-TOKEN-HERE)](https://codecov.io/gh/dialogchain/python)
 
 ## 📦 Installation
 
@@ -17,8 +19,8 @@
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/taskinity/dialogchain.git
-   cd dialogchain
+   git clone https://github.com/dialogchain/python.git
+   cd python
    ```
 
 2. Install dependencies:
@@ -33,9 +35,9 @@
 
 ### Development Setup
 
-1. Install development dependencies:
+1. Install development and test dependencies:
    ```bash
-   poetry install --with dev
+   poetry install --with dev,test
    ```
 
 2. Set up pre-commit hooks:
@@ -45,8 +47,71 @@
 
 3. Run tests:
    ```bash
-   poetry run pytest
+   make test
    ```
+   
+   Or with coverage report:
+   ```bash
+   make coverage
+   ```
+
+## 🏗️ Project Structure
+
+```
+dialogchain/
+├── src/
+│   └── dialogchain/         # Main package
+│       ├── __init__.py
+│       ├── cli.py           # Command-line interface
+│       ├── config.py        # Configuration handling
+│       ├── connectors/      # Connector implementations
+│       ├── engine.py        # Core engine
+│       ├── exceptions.py    # Custom exceptions
+│       ├── processors/      # Processor implementations
+│       └── utils.py         # Utility functions
+├── tests/                   # Test files
+│   ├── unit/               # Unit tests
+│   │   ├── core/           # Core functionality tests
+│   │   ├── connectors/     # Connector tests
+│   │   └── ...
+│   └── integration/        # Integration tests
+├── .github/                # GitHub workflows
+├── docs/                   # Documentation
+├── .gitignore
+├── .pre-commit-config.yaml
+├── Makefile               # Common development commands
+├── pyproject.toml         # Project metadata and dependencies
+└── README.md
+```
+
+## 🧪 Testing
+
+Run the full test suite:
+```bash
+make test
+```
+
+Run specific test categories:
+```bash
+# Unit tests
+make test-unit
+
+# Integration tests
+make test-integration
+
+# With coverage report
+make coverage
+```
+
+## 🧹 Code Quality
+
+Format and check code style:
+```bash
+make format    # Auto-format code
+make lint      # Run linters
+make typecheck # Run type checking
+make check-all # Run all checks
+```
 
 ## 🚀 Quick Start
 
