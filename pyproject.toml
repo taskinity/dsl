@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dialogchain"
-version = "0.1.0"
+version = "0.1.1"
 description = "DialogChain - A flexible and extensible dialog processing framework"
 readme = "README.md"
 requires-python = ">=3.8,<3.12"
