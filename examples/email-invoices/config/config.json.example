@@ -1,0 +1,9 @@
+{
+  "email": "your_email@example.com",
+  "password": "your_app_specific_password",
+  "imap_server": "imap.example.com",
+  "imap_port": 993,
+  "output_dir": "./output",
+  "year": 2025,
+  "month": 5
+}
