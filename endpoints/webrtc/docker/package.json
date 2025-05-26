@@ -1,0 +1,15 @@
+{
+  "name": "webrtc-mock",
+  "version": "1.0.0",
+  "description": "WebRTC Mock Server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^4.4.0",
+    "wrtc": "^0.4.7"
+  }
+}

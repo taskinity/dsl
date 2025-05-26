@@ -1,0 +1,59 @@
+---
+# Common variables for all nodes
+
+# System settings
+timezone: Europe/Warsaw
+locale: en_US.UTF-8
+
+# Network settings
+dns_servers:
+  - 8.8.8.8
+  - 1.1.1.1
+
+# Docker settings
+docker_users:
+  - "{{ ansible_user }}"
+
+docker_compose_version: v2.23.0
+
+# Service versions
+portainer_version: latest
+node_red_version: latest
+gitea_version: latest
+telegraf_version: latest
+influxdb_version: 2.7
+
+# Service ports
+service_ports:
+  - { port: 22, proto: tcp, description: SSH }
+  - { port: 80, proto: tcp, description: HTTP }
+  - { port: 443, proto: tcp, description: HTTPS }
+  - { port: 1880, proto: tcp, description: Node-RED }
+  - { port: 3000, proto: tcp, description: Gitea }
+  - { port: 8086, proto: tcp, description: InfluxDB }
+  - { port: 9000, proto: tcp, description: Portainer }
+  - { port: 8000, proto: tcp, description: Portainer Edge Agent }
+
+# Telegraf configuration
+telegraf_plugins:
+  - name: cpu
+    config: |
+      percpu = true
+      totalcpu = true
+  - name: mem
+  - name: disk
+  - name: diskio
+  - name: net
+  - name: docker
+
+# Node-RED settings
+node_red_credential_secret: "{{ vault_node_red_credential_secret }}"
+
+# Gitea settings
+gitea_admin_username: admin
+gitea_admin_email: "admin@{{ domain }}"
+gitea_domain: "{{ domain }}"
+
+# Backup settings
+backup_dir: /var/backups/edge-computing
+retention_days: 7
