@@ -1,7 +1,9 @@
 # Camel Router - Multi-language ML/Media Processing Pipeline
 # Makefile for development and deployment
 
-.PHONY: help install dev test clean build docker run-example lint docs
+.PHONY: help install dev test clean build docker run-example lint docs \
+        test-unit test-integration test-e2e coverage typecheck format check-codestyle \
+        check-all pre-commit-install setup-dev-env docs-serve docs-clean
 
 # Default target
 help:

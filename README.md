@@ -5,12 +5,15 @@
 ## ✨ Features
 
 - **📹 Real-time Video Processing**: RTSP cameras, streams, file inputs
-- **🤖 Multi-Language Support**: Python, Go, Rust, C++, Node.js processors
+- **🤖 Multi-Language Support**: Python, Go, Rust, C++, Node.js processors  
 - **🔗 Flexible Connectors**: Email, HTTP, gRPC, MQTT, file outputs  
 - **🎯 ML-Ready**: Object detection, inference pipelines, TensorFlow integration
 - **⚙️ Simple Configuration**: URL-style routing with .env support
 - **🐳 Cloud Native**: Docker, Kubernetes, horizontal scaling
 - **📊 Production Ready**: Monitoring, health checks, error handling
+- **🧪 Comprehensive Testing**: Unit, integration, and end-to-end tests
+- **🔍 Code Quality**: Type hints, linting, and code formatting
+- **📈 Test Coverage**: Code coverage reporting and enforcement
 
 ## 🏗️ Architecture
 
