@@ -1,1 +1,88 @@
-# ❌ Missing
+version: '3.8'
+
+services:
+  # Taskinity DSL Service
+  taskinity-dsl:
+    build:
+      context: ..
+      dockerfile: examples/Dockerfile
+    container_name: taskinity-dsl
+    volumes:
+      - ./shared:/app/shared
+      - ./logs:/app/logs
+      - ./output:/app/output
+      - ./config:/app/config
+    environment:
+      - PYTHONPATH=/app
+      - LOG_LEVEL=INFO
+      - OUTPUT_DIR=/app/output
+    env_file:
+      - ./examples/email-invoices/.env
+      - ./examples/web-invoices/.env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    ports:
+      - "8000:8000"
+    command: ["python", "-m", "taskinity.cli", "--config", "/app/config/email_invoices.yaml"]
+
+  # Email Invoice Processor Service
+  email-processor:
+    build:
+      context: ..
+      dockerfile: examples/Dockerfile
+    container_name: email-invoice-processor
+    volumes:
+      - ./shared:/app/shared
+      - ./logs/email:/app/logs
+      - ./output/email:/app/output
+    environment:
+      - PYTHONPATH=/app
+      - CONFIG_FILE=/app/config/email_invoices.yaml
+      - LOG_LEVEL=INFO
+      - OUTPUT_DIR=/app/output
+    env_file:
+      - ./examples/email-invoices/.env
+    restart: unless-stopped
+    depends_on:
+      - taskinity-dsl
+    command: ["python", "-m", "taskinity.runner", "--config", "/app/config/email_invoices.yaml"]
+
+  # Web Invoice Processor Service
+  web-processor:
+    build:
+      context: ..
+      dockerfile: examples/Dockerfile
+    container_name: web-invoice-processor
+    volumes:
+      - ./shared:/app/shared
+      - ./logs/web:/app/logs
+      - ./output/web:/app/output
+      - ./config:/app/config
+    environment:
+      - PYTHONPATH=/app
+      - CONFIG_FILE=/app/config/web_invoices.yaml
+      - LOG_LEVEL=INFO
+      - OUTPUT_DIR=/app/output
+    env_file:
+      - ./examples/web-invoices/.env
+    restart: unless-stopped
+    depends_on:
+      - taskinity-dsl
+    command: ["python", "-m", "taskinity.runner", "--config", "/app/config/web_invoices.yaml"]
+
+# Volumes for persistent storage
+volumes:
+  shared:
+  logs:
+  output:
+  config:
+
+# Network configuration
+networks:
+  default:
+    driver: bridge
