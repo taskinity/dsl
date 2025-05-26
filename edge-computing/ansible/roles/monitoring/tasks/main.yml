@@ -1,0 +1,37 @@
+---
+# Deploy monitoring stack (Telegraf + InfluxDB)
+
+- name: Create monitoring directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0755'
+  with_items:
+    - /opt/monitoring/telegraf
+    - /opt/monitoring/influxdb
+  tags: [monitoring, directories]
+
+- name: Generate Telegraf configuration
+  template:
+    src: telegraf.conf.j2
+    dest: /opt/monitoring/telegraf/telegraf.conf
+    mode: '0644'
+  tags: [monitoring, config]
+
+- name: Create monitoring docker-compose file
+  template:
+    src: docker-compose.yml.j2
+    dest: /etc/docker/compose/monitoring/docker-compose.yml
+    mode: '0640'
+  tags: [monitoring, config]
+  notify: restart monitoring
+
+- name: Enable and start monitoring services
+  systemd:
+    name: "docker-compose@monitoring"
+    state: started
+    enabled: yes
+    daemon_reload: yes
+  tags: [monitoring, services]

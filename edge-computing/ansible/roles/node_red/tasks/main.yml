@@ -1,0 +1,27 @@
+---
+# Deploy Node-RED for visual programming
+
+- name: Create Node-RED data directory
+  file:
+    path: /opt/nodered/data
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0755'
+  tags: [node-red, directories]
+
+- name: Create Node-RED docker-compose file
+  template:
+    src: docker-compose.yml.j2
+    dest: /etc/docker/compose/nodered/docker-compose.yml
+    mode: '0640'
+  tags: [node-red, config]
+  notify: restart nodered
+
+- name: Enable and start Node-RED service
+  systemd:
+    name: "docker-compose@nodered"
+    state: started
+    enabled: yes
+    daemon_reload: yes
+  tags: [node-red, services]

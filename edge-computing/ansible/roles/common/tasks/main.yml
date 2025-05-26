@@ -1,0 +1,100 @@
+---
+# Common system configuration tasks
+
+- name: Update and upgrade apt packages
+  apt:
+    upgrade: dist
+    update_cache: yes
+    cache_valid_time: 3600
+  tags: [always]
+
+- name: Install common packages
+  apt:
+    name:
+      - curl
+      - wget
+      - git
+      - htop
+      - vim
+      - tmux
+      - jq
+      - python3-pip
+      - python3-venv
+      - ufw
+      - fail2ban
+    state: present
+  tags: [common, packages]
+
+- name: Set timezone
+  timezone:
+    name: "{{ timezone }}"
+  tags: [common, system]
+
+- name: Configure locale
+  locale_gen:
+    name: "{{ locale }}"
+    state: present
+  tags: [common, system]
+
+- name: Set default locale
+  lineinfile:
+    dest: /etc/default/locale
+    regexp: "^\s*LANG="
+    line: 'LANG="{{ locale }}"'
+    state: present
+  tags: [common, system]
+
+- name: Configure DNS servers
+  copy:
+    dest: /etc/systemd/resolved.conf
+    content: |
+      [Resolve]
+      DNS={% for dns in dns_servers %}{{ dns }}{% if not loop.last %} {% endif %}{% endfor %}
+      FallbackDNS=1.1.1.1 8.8.8.8 9.9.9.10
+      Domains=~.
+    mode: '0644'
+    owner: root
+    group: root
+  notify: restart systemd-resolved
+  tags: [common, network]
+
+- name: Enable automatic updates
+  apt:
+    name: unattended-upgrades
+    state: present
+  tags: [common, security]
+
+- name: Configure automatic updates
+  copy:
+    src: 50unattended-upgrades
+    dest: /etc/apt/apt.conf.d/50unattended-upgrades
+    mode: '0644'
+  tags: [common, security]
+
+- name: Create admin user
+  user:
+    name: "{{ admin_username | default('admin') }}"
+    groups: sudo
+    append: yes
+    shell: /bin/bash
+    password: "{{ admin_password | password_hash('sha512') }}"
+  when: admin_password is defined
+  tags: [common, users]
+
+- name: Configure SSH for admin user
+  block:
+    - name: Create .ssh directory
+      file:
+        path: "/home/{{ admin_username | default('admin') }}/.ssh"
+        state: directory
+        mode: '0700'
+        owner: "{{ admin_username | default('admin') }}"
+        group: "{{ admin_username | default('admin') }}"
+
+    - name: Add SSH key for admin
+      authorized_key:
+        user: "{{ admin_username | default('admin') }}"
+        key: "{{ admin_ssh_key }}"
+        state: present
+  when: admin_ssh_key is defined
+  tags: [common, ssh, users]

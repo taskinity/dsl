@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>WebRTC Test</title>
+  <style>
+    #videoContainer {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    video {
+      width: 300px;
+      margin: 10px;
+      background: #000;
+    }
+    .controls {
+      margin: 10px 0;
+      padding: 10px;
+      background: #f0f0f0;
+      border-radius: 4px;
+    }
+    button {
+      margin: 5px;
+      padding: 8px 16px;
+      cursor: pointer;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <h1>WebRTC Test Page</h1>
+  <div id="videoContainer">
+    <video id="localVideo" autoplay muted></video>
+    <video id="remoteVideo" autoplay></video>
+  </div>
+  <div class="controls">
+    <button id="startButton">Start Camera</button>
+    <button id="callButton" disabled>Start Call</button>
+    <button id="hangupButton" disabled>Hang Up</button>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    // DOM elements
+    const localVideo = document.getElementById('localVideo');
+    const remoteVideo = document.getElementById('remoteVideo');
+    const startButton = document.getElementById('startButton');
+    const callButton = document.getElementById('callButton');
+    const hangupButton = document.getElementById('hangupButton');
+
+    // WebRTC variables
+    let localStream;
+    let peerConnection;
+    const configuration = {
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' }
+      ]
+    };
+
+    // Socket.IO connection
+    const socket = io();
+
+    // Event listeners
+    startButton.onclick = start;
+    callButton.onclick = call;
+    hangupButton.onclick = hangup;
+
+    // Handle incoming signals
+    socket.on('signal', async (data) => {
+      if (!peerConnection) return;
+      
+      try {
+        if (data.candidate) {
+          await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+        } else if (data.sdp) {
+          await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+          if (data.sdp.type === 'offer') {
+            const answer = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(answer);
+            socket.emit('signal', {
+              to: data.from,
+              sdp: peerConnection.localDescription
+            });
+          }
+        }
+      } catch (err) {
+        console.error('Error handling signal:', err);
+      }
+    });
+
+    // Start local camera
+    async function start() {
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({ 
+          video: true, 
+          audio: true 
+        });
+        localVideo.srcObject = localStream;
+        startButton.disabled = true;
+        callButton.disabled = false;
+        console.log('Local stream started');
+      } catch (err) {
+        console.error('Error accessing media devices:', err);
+        alert('Could not access camera/microphone: ' + err.message);
+      }
+    }
+
+    // Start WebRTC call
+    async function call() {
+      callButton.disabled = true;
+      hangupButton.disabled = false;
+      
+      // Create peer connection
+      peerConnection = new RTCPeerConnection(configuration);
+      
+      // Handle ICE candidates
+      peerConnection.onicecandidate = (event) => {
+        if (event.candidate) {
+          socket.emit('signal', { 
+            candidate: event.candidate.toJSON() 
+          });
+        }
+      };
+      
+      // Handle remote stream
+      peerConnection.ontrack = (event) => {
+        remoteVideo.srcObject = event.streams[0];
+        console.log('Received remote stream');
+      };
+      
+      // Add local stream tracks
+      localStream.getTracks().forEach(track => {
+        peerConnection.addTrack(track, localStream);
+      });
+      
+      try {
+        // Create and send offer
+        const offer = await peerConnection.createOffer({
+          offerToReceiveAudio: true,
+          offerToReceiveVideo: true
+        });
+        await peerConnection.setLocalDescription(offer);
+        
+        socket.emit('signal', { 
+          sdp: peerConnection.localDescription 
+        });
+        
+        console.log('Call started');
+      } catch (err) {
+        console.error('Error starting call:', err);
+        hangup();
+      }
+    }
+
+    // Hang up call
+    function hangup() {
+      if (peerConnection) {
+        peerConnection.close();
+        peerConnection = null;
+      }
+      if (remoteVideo.srcObject) {
+        remoteVideo.srcObject.getTracks().forEach(track => track.stop());
+        remoteVideo.srcObject = null;
+      }
+      callButton.disabled = false;
+      hangupButton.disabled = true;
+      console.log('Call ended');
+    }
+
+    // Handle page unload
+    window.addEventListener('beforeunload', () => {
+      if (peerConnection) {
+        hangup();
+      }
+    });
+  </script>
+</body>
+</html>

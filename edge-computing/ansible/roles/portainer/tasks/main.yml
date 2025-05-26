@@ -1,0 +1,27 @@
+---
+# Deploy Portainer container management UI
+
+- name: Create Portainer data directory
+  file:
+    path: /opt/portainer/data
+    state: directory
+    owner: root
+    group: docker
+    mode: '0775'
+  tags: [portainer, directories]
+
+- name: Create Portainer docker-compose file
+  template:
+    src: docker-compose.yml.j2
+    dest: /etc/docker/compose/portainer/docker-compose.yml
+    mode: '0640'
+  tags: [portainer, config]
+  notify: restart portainer
+
+- name: Enable and start Portainer service
+  systemd:
+    name: "docker-compose@portainer"
+    state: started
+    enabled: yes
+    daemon_reload: yes
+  tags: [portainer, services]

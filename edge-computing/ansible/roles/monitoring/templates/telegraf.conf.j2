@@ -1,0 +1,77 @@
+# Telegraf Configuration
+
+[agent]
+  interval = "10s"
+  round_interval = true
+  metric_batch_size = 1000
+  metric_buffer_limit = 10000
+  collection_jitter = "0s"
+  flush_interval = "10s"
+  flush_jitter = "0s"
+  precision = ""
+  debug = false
+  quiet = false
+  logfile = ""
+  hostname = "{{ ansible_hostname }}"
+  omit_hostname = false
+
+# Output Plugin: InfluxDB v2
+[[outputs.influxdb_v2]]
+  urls = ["http://influxdb:8086"]
+  token = "${DOCKER_INFLUXDB_INIT_ADMIN_TOKEN}"
+  organization = "${DOCKER_INFLUXDB_INIT_ORG}"
+  bucket = "${DOCKER_INFLUXDB_INIT_BUCKET}"
+
+# Input Plugins
+{% for plugin in telegraf_plugins %}
+[[inputs.{{ plugin.name }}]]
+{% if plugin.config is defined %}
+{{ plugin.config | indent(2, false) }}
+{% endif %}
+
+{% endfor %}
+
+# Docker input plugin
+[[inputs.docker]]
+  endpoint = "unix:///var/run/docker.sock"
+  gather_services = false
+  container_names = []
+  container_name_include = []
+  container_name_exclude = []
+  timeout = "5s"
+  perdevice = true
+  total = false
+  tag_env = ["JAVA_HOME", "HEAP_SIZE"]
+  docker_label_include = []
+  docker_label_exclude = []
+
+# System input plugin
+[[inputs.system]]
+  # no configuration
+
+# CPU input plugin
+[[inputs.cpu]]
+  percpu = true
+  totalcpu = true
+  collect_cpu_time = false
+  report_active = false
+
+# Memory input plugin
+[[inputs.mem]]
+  # no configuration
+
+# Disk input plugin
+[[inputs.disk]]
+  ignore_fs = ["tmpfs", "devtmpfs", "devfs", "iso9660", "overlay", "aufs", "squashfs"]
+
+# Disk IO input plugin
+[[inputs.diskio]]
+  # no configuration
+
+# Net input plugin
+[[inputs.net]]
+  # no configuration
+
+# Processes input plugin
+[[inputs.processes]]
+  # no configuration

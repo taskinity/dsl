@@ -1,0 +1,26 @@
+---
+version: '3.8'
+
+services:
+  nodered:
+    image: nodered/node-red:{{ node_red_version }}
+    container_name: nodered
+    restart: always
+    user: "1000:1000"
+    ports:
+      - "1880:1880"
+    volumes:
+      - /opt/nodered/data:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - TZ={{ timezone }}
+      - NODE_RED_CREDENTIAL_SECRET={{ node_red_credential_secret }}
+      - NODE_RED_ENABLE_SAFE_MODE=false
+      - NODE_RED_ENABLE_PROJECTS=false
+    networks:
+      - nodered
+
+networks:
+  nodered:
+    driver: bridge

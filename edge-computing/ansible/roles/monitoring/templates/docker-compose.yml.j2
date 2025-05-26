@@ -1,0 +1,60 @@
+---
+version: '3.8'
+
+services:
+  influxdb:
+    image: influxdb:{{ influxdb_version }}
+    container_name: influxdb
+    restart: always
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD={{ vault_influxdb_admin_password | default('admin123') }}
+      - DOCKER_INFLUXDB_INIT_ORG=edge
+      - DOCKER_INFLUXDB_INIT_BUCKET=edge_metrics
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN={{ vault_influxdb_token | default('your-super-secret-token') }}
+    volumes:
+      - /opt/monitoring/influxdb:/var/lib/influxdb2
+    ports:
+      - "8086:8086"
+    networks:
+      - monitoring
+
+  telegraf:
+    image: telegraf:{{ telegraf_version }}
+    container_name: telegraf
+    restart: always
+    environment:
+      - HOST_PROC=/rootfs/proc
+      - HOST_SYS=/rootfs/sys
+      - HOST_ETC=/rootfs/etc
+      - HOST_MOUNT_PREFIX=/rootfs
+    volumes:
+      - /:/rootfs:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /opt/monitoring/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+    depends_on:
+      - influxdb
+    networks:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: always
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD={{ vault_grafana_admin_password | default('admin123') }}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - /opt/monitoring/grafana:/var/lib/grafana
+    ports:
+      - "3001:3000"
+    depends_on:
+      - influxdb
+    networks:
+      - monitoring
+
+networks:
+  monitoring:
+    driver: bridge

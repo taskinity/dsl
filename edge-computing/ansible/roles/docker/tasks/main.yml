@@ -1,0 +1,73 @@
+---
+# Install and configure Docker
+
+- name: Install prerequisites
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+    state: present
+  tags: [docker, packages]
+
+- name: Add Docker GPG key
+  apt_key:
+    url: https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg
+    state: present
+  tags: [docker, packages]
+
+- name: Add Docker repository
+  apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable"
+    state: present
+    filename: docker
+  tags: [docker, packages]
+
+- name: Install Docker CE
+  apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+    state: present
+    update_cache: yes
+  tags: [docker, packages]
+
+- name: Add users to docker group
+  user:
+    name: "{{ item }}"
+    groups: docker
+    append: yes
+  loop: "{{ docker_users }}"
+  tags: [docker, users]
+
+- name: Install Docker Compose
+  get_url:
+    url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-linux-x86_64"
+    dest: /usr/local/bin/docker-compose
+    mode: '0755'
+  tags: [docker, packages]
+
+- name: Create docker-compose directory
+  file:
+    path: /etc/docker/compose
+    state: directory
+    mode: '0755'
+  tags: [docker, config]
+
+- name: Create systemd service for Docker Compose
+  template:
+    src: docker-compose@.service.j2
+    dest: /etc/systemd/system/docker-compose@.service
+    mode: '0644'
+  tags: [docker, systemd]
+  notify: reload systemd
+
+- name: Enable and start Docker service
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+  tags: [docker, services]
