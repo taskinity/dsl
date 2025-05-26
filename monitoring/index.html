@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taskinity DSL - Monitoring Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard">
+        <header class="dashboard-header">
+            <h1><i class="fas fa-tachometer-alt"></i> Taskinity DSL Monitoring</h1>
+            <div class="status-indicator" id="connection-status">
+                <span class="status-dot"></span>
+                <span class="status-text">Connecting...</span>
+            </div>
+        </header>
+
+        <div class="dashboard-grid">
+            <!-- System Metrics -->
+            <div class="card system-metrics">
+                <h2><i class="fas fa-server"></i> System Metrics</h2>
+                <div class="metric-grid">
+                    <div class="metric-item">
+                        <div class="metric-label">CPU Usage</div>
+                        <div class="metric-value" id="cpu-usage">--%</div>
+                        <div class="metric-progress">
+                            <div class="progress-bar" id="cpu-bar"></div>
+                        </div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">Memory Usage</div>
+                        <div class="metric-value" id="memory-usage">--%</div>
+                        <div class="metric-progress">
+                            <div class="progress-bar" id="memory-bar"></div>
+                        </div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">Disk Usage</div>
+                        <div class="metric-value" id="disk-usage">--%</div>
+                        <div class="metric-progress">
+                            <div class="progress-bar" id="disk-bar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Message Statistics -->
+            <div class="card message-stats">
+                <h2><i class="fas fa-chart-line"></i> Message Statistics</h2>
+                <div class="stats-container">
+                    <div class="stat-item">
+                        <div class="stat-value" id="messages-processed">0</div>
+                        <div class="stat-label">Messages Processed</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="processing-time">0ms</div>
+                        <div class="stat-label">Avg. Processing Time</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="error-rate">0%</div>
+                        <div class="stat-label">Error Rate</div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="messageChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Recent Alerts -->
+            <div class="card alerts">
+                <h2><i class="fas fa-exclamation-triangle"></i> Recent Alerts</h2>
+                <div class="alerts-list" id="alerts-list">
+                    <div class="no-alerts">No recent alerts</div>
+                </div>
+            </div>
+
+            <!-- Route Status -->
+            <div class="card route-status">
+                <h2><i class="fas fa-route"></i> Route Status</h2>
+                <div class="routes-list" id="routes-list">
+                    <div class="no-routes">No active routes</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>

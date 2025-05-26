@@ -30,8 +30,15 @@ help:
 
 # Installation
 install:
-	pip install -e .
-	@echo "✅ DialogChain installed"
+	@if [ -f "pyproject.toml" ] || [ -f "setup.py" ]; then \
+		pip install -e .; \
+		echo "✅ Package installed in development mode"; \
+	else \
+		echo "⚠️  No Python package found. Initializing project..."; \
+		poetry init --no-interaction --name="taskinity-dsl" --author="Taskinity Team" --python="^3.9"; \
+		poetry add --dev pytest pytest-cov black flake8 "mypy>=0.900,<2.0"; \
+		echo "✅ Project initialized with Poetry"; \
+	fi
 
 dev: install
 	pip install -e ".[dev]"
@@ -312,25 +319,32 @@ build-all: build-go build-cpp build-rust
 
 # Monitoring and debugging
 logs:
-	tail -f alerts/*.log
+	@if [ -d "alerts" ] && [ "$$(ls -A alerts 2>/dev/null)" ]; then \
+		tail -f alerts/*.log; \
+	else \
+		echo "⚠️  No alert logs found. Start an example first."; \
+		mkdir -p alerts; \
+	fi
 
-monitor:
-	@echo "📊 Starting monitoring dashboard..."
-	python -c "\
-import http.server\
-import socketserver\
-import webbrowser\
-import os\
-\
-PORT = 8080\
-Handler = http.server.SimpleHTTPRequestHandler\
-\
-os.chdir('monitoring')\
-with socketserver.TCPServer(('', PORT), Handler) as httpd:\
-    print(f'Monitoring dashboard at http://localhost:{PORT}')\
-    webbrowser.open(f'http://localhost:{PORT}')\
-    httpd.serve_forever()\
-"
+# Start the monitoring dashboard
+monitoring:
+	@echo "🚀 Starting monitoring dashboard..."
+	@if [ ! -d "monitoring" ]; then \
+		echo "❌ Error: monitoring directory not found"; \
+		exit 1; \
+	fi
+	@echo "🌐 Dashboard available at: http://localhost:8000"
+	@echo "🛑 Press Ctrl+C to stop the server"
+	@cd monitoring && python3 -m http.server 8000
+
+# Stop the monitoring dashboard
+monitoring-stop:
+	@echo "🛑 Stopping monitoring dashboard..."
+	@-pkill -f "python3 -m http.server 8000" 2>/dev/null || true
+	@echo "✅ Monitoring dashboard stopped"
+
+# Alias for backward compatibility
+monitor: monitoring
 
 # Documentation
 docs:

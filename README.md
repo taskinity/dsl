@@ -9,6 +9,24 @@
 [![Tests](https://github.com/dialogchain/python/actions/workflows/tests.yml/badge.svg)](https://github.com/dialogchain/python/actions/workflows/tests.yml)
 [![codecov](https://codecov.io/gh/dialogchain/python/graph/badge.svg?token=YOUR-TOKEN-HERE)](https://codecov.io/gh/dialogchain/python)
 
+## 📊 Monitoring Dashboard
+
+Taskinity DSL includes a built-in monitoring dashboard to help you track and visualize the performance of your dialog processing pipelines.
+
+### Quick Start
+
+1. Start the monitoring dashboard:
+   ```bash
+   make monitoring
+   ```
+2. Open your browser to: http://localhost:8000
+3. To stop the dashboard:
+   ```bash
+   make monitoring-stop
+   ```
+
+For more detailed information, see the [Monitoring Documentation](docs/monitoring.md).
+
 ## 📦 Installation
 
 ### Prerequisites
@@ -321,7 +339,8 @@ processors:
     command: "cargo run --bin data_processor"
     config:
       batch_size: 32
-      simd_enabled: true
+cd /path/to/your/project/monitoring
+python3 -m http.server 8000      simd_enabled: true
 
   # C++ optimized algorithms
   - type: "external"
