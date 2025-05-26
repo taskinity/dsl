@@ -121,6 +121,7 @@ class TestLogDestination:
     async def test_file_logging(self):
         dest = LogDestination('log://test.log')
         
+        # Mock the built-in open function and os module
         with patch('builtins.open', mock_open()) as mock_file, \
              patch('os.path.exists', return_value=False), \
              patch('os.makedirs') as mock_makedirs:
@@ -132,6 +133,7 @@ class TestLogDestination:
             args, kwargs = mock_file.call_args
             assert args[0] == 'test.log'
             assert 'a' in args or kwargs.get('mode') == 'a'
+            assert 'utf-8' in kwargs.get('encoding', '')
             
             # Verify the write was called with the expected message
             write_calls = mock_file.return_value.__enter__.return_value.write.call_args_list
