@@ -115,6 +115,5 @@
 
 
 
-move dialogchain python package from /home/tom/github/taskinity/dsl to /home/tom/github/dialogchain/python
-move only necessary files which are part of python package without folders: examples, todo,, endpoints, ...
+
 

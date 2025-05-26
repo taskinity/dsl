@@ -3,7 +3,8 @@
 
 .PHONY: help install dev test clean build docker run-example lint docs \
         test-unit test-integration test-e2e coverage typecheck format check-codestyle \
-        check-all pre-commit-install setup-dev-env docs-serve docs-clean
+        check-all pre-commit-install setup-dev-env docs-serve docs-clean \
+        publish testpublish version
 
 # Default target
 help:
@@ -16,6 +17,9 @@ help:
 	@echo "  lint             - Run linting and format checks"
 	@echo "  clean            - Clean build artifacts"
 	@echo "  build            - Build distribution packages"
+	@echo "  publish          - Publish to PyPI (requires PYPI_TOKEN)"
+	@echo "  testpublish      - Publish to TestPyPI (for testing)"
+	@echo "  version          - Bump version (use: make version PART=major|minor|patch)"
 	@echo "  docker           - Build Docker image"
 	@echo "  run-example      - Run an example (use EXAMPLE=name)"
 	@echo "  list-examples    - List available examples"
@@ -73,8 +77,41 @@ clean:
 	@echo "✅ Cleaned build artifacts"
 
 build: clean
-	python setup.py sdist bdist_wheel
+	poetry build
 	@echo "✅ Distribution packages built"
+
+# Version management
+version:
+	@if [ -z "$(PART)" ]; then \
+		echo "Error: Please specify version part with PART=patch|minor|major"; \
+		exit 1; \
+	fi
+	@echo "Bumping $$(poetry version $(PART) --dry-run) → $$(poetry version $(PART))"
+	git add pyproject.toml
+	git commit -m "Bump version to $$(poetry version --short)"
+	git tag -a "v$$(poetry version --short)" -m "Version $$(poetry version --short)"
+	@echo "✅ Version bumped and tagged. Don't forget to push with tags: git push --follow-tags"
+
+# Publishing
+publish: build
+	@if [ -z "$(PYPI_TOKEN)" ]; then \
+		echo "Error: Please set PYPI_TOKEN environment variable"; \
+		exit 1; \
+	fi
+	@echo "🚀 Publishing to PyPI..."
+	poetry publish --build --username=__token__ --password=$(PYPI_TOKEN)
+	@echo "✅ Successfully published to PyPI"
+
+# Test publishing
+TEST_PYPI_TOKEN ?= $(PYPI_TEST_TOKEN)
+testpublish: build
+	@if [ -z "$(TEST_PYPI_TOKEN)" ]; then \
+		echo "Error: Please set PYPI_TEST_TOKEN environment variable"; \
+		exit 1; \
+	fi
+	@echo "🚀 Publishing to TestPyPI..."
+	poetry publish --build --repository testpypi --username=__token__ --password=$(TEST_PYPI_TOKEN)
+	@echo "✅ Successfully published to TestPyPI"
 
 # Docker
 docker:
