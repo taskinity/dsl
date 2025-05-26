@@ -1,0 +1,22 @@
+---
+# Main playbook for edge computing infrastructure
+- name: Configure edge nodes
+  hosts: edge_nodes
+  become: true
+  gather_facts: true
+  any_errors_fatal: true
+
+  # Load variables
+  vars_files:
+    - "group_vars/all/vars.yml"
+    - "group_vars/all/vault.yml"
+
+  roles:
+    - common
+    - { role: docker, tags: ['docker'] }
+    - { role: portainer, tags: ['portainer', 'deploy'] }
+    - { role: gitea, tags: ['gitea', 'deploy'] }
+    - { role: node_red, tags: ['node-red', 'deploy'] }
+    - { role: monitoring, tags: ['monitoring', 'deploy'] }
+    - { role: security, tags: ['security'] }
+    - { role: backup, tags: ['backup'] }

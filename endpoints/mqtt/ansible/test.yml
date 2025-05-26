@@ -1,0 +1,36 @@
+---
+- name: Test MQTT endpoint
+  hosts: mocks
+  gather_facts: false
+  become: false
+
+  tasks:
+    - name: Install required packages
+      apt:
+        name:
+          - mosquitto-clients
+          - python3-pip
+        state: present
+      when: ansible_os_family == 'Debian'
+
+    - name: Install Python packages
+      pip:
+        name:
+          - paho-mqtt
+          - paho-mqtt
+        state: present
+
+    - name: Test MQTT broker
+      script: test_mqtt.py
+      register: mqtt_test
+      changed_when: false
+      failed_when: false
+
+    - name: Show MQTT test result
+      debug:
+        var: mqtt_test.stdout_lines
+
+    - name: Fail if MQTT test failed
+      fail:
+        msg: "MQTT test failed - could not connect to broker"
+      when: mqtt_test.rc != 0
