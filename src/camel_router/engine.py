@@ -3,12 +3,42 @@ import json
 import os
 import subprocess
 import tempfile
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Tuple
 from urllib.parse import urlparse, parse_qs
 from jinja2 import Template
 import yaml
 from .processors import *
 from .connectors import *
+
+
+def parse_uri(uri: str) -> Tuple[str, str]:
+    """
+    Parse a URI string into its scheme and path components.
+    
+    Args:
+        uri: The URI string to parse (e.g., 'timer:5s' or 'http://example.com')
+        
+    Returns:
+        A tuple of (scheme, path) where:
+        - scheme is the URI scheme (e.g., 'timer', 'http')
+        - path is the rest of the URI after the scheme
+        
+    Example:
+        >>> parse_uri('timer:5s')
+        ('timer', '5s')
+        >>> parse_uri('http://example.com/path')
+        ('http', '//example.com/path')
+    """
+    if '://' in uri:
+        # Handle standard URIs with ://
+        parsed = urlparse(uri)
+        return parsed.scheme, uri.split('://', 1)[1]
+    elif ':' in uri:
+        # Handle simple URIs with just a scheme:path
+        scheme, path = uri.split(':', 1)
+        return scheme, path
+    else:
+        raise ValueError(f"Invalid URI format: {uri}")
 
 
 class CamelRouterEngine:

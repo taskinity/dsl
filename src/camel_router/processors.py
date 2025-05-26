@@ -117,42 +117,34 @@ class FilterProcessor(Processor):
     async def process(self, message: Any) -> Optional[Any]:
         """Filter message based on condition"""
         try:
-            # Simple template-based condition evaluation
-            template = Template(self.condition)
-
             # Prepare context for condition evaluation
             if isinstance(message, dict):
-                context = message
+                context = message.copy()
             else:
                 context = {"message": message}
 
-            # Render condition and evaluate
-            condition_str = template.render(**context)
-
-            # Simple evaluation (could be enhanced with more sophisticated parsing)
-            if self._evaluate_condition(condition_str, context):
+            # Evaluate condition directly using the context
+            if self._evaluate_condition(self.condition, context):
                 return message
-            else:
-                return None
+            return None
 
         except Exception as e:
             print(f"❌ Filter processor error: {e}")
-            return message  # Pass through on error
+            return None  # Filter out on error to be safe
 
     def _evaluate_condition(self, condition: str, context: Dict) -> bool:
-        """Evaluate condition string - basic implementation"""
+        """
+        Evaluate condition string using the provided context.
+        
+        The condition is evaluated as a Python expression with access to the context variables.
+        For example: 'value > 10 and name == "test"'
+        """
         try:
-            # Replace template variables in condition
-            for key, value in context.items():
-                if isinstance(value, (int, float)):
-                    condition = condition.replace(f"{{{{{key}}}}}", str(value))
-                elif isinstance(value, str):
-                    condition = condition.replace(f"{{{{{key}}}}}", f"'{value}'")
-
-            # Simple eval (in production, use safer expression evaluator)
-            return eval(condition)
-        except:
-            return True  # Pass through if evaluation fails
+            # Safely evaluate the condition with access to context variables
+            return eval(condition, {"__builtins__": {}}, context)
+        except Exception as e:
+            print(f"❌ Condition evaluation error: {e}, condition: {condition}")
+            return False
 
 
 class TransformProcessor(Processor):
@@ -225,17 +217,32 @@ class AggregateProcessor(Processor):
 
     def _create_aggregate(self) -> Dict[str, Any]:
         """Create aggregated message"""
+        if not self.buffer:
+            return {}
+            
         if self.strategy == 'collect':
-            return {
+            # Get IDs from messages if they exist
+            first_msg = self.buffer[0]["message"]
+            last_msg = self.buffer[-1]["message"]
+            
+            result = {
                 "count": len(self.buffer),
                 "events": [item["message"] for item in self.buffer],
-                "first_timestamp": self.buffer[0]["timestamp"] if self.buffer else None,
-                "last_timestamp": self.buffer[-1]["timestamp"] if self.buffer else None
+                "first_timestamp": self.buffer[0]["timestamp"],
+                "last_timestamp": self.buffer[-1]["timestamp"],
+                "first_id": first_msg.get("id") if isinstance(first_msg, dict) else None,
+                "last_id": last_msg.get("id") if isinstance(last_msg, dict) else None
             }
+            
+            # Remove None values
+            result = {k: v for k, v in result.items() if v is not None}
+            
+            return result
+            
         elif self.strategy == 'count':
             return {"count": len(self.buffer)}
-        else:
-            return {"messages": self.buffer}
+            
+        return {"messages": [item["message"] for item in self.buffer]}
 
     def _parse_timeout(self, timeout_str: str) -> float:
         """Parse timeout string to seconds"""

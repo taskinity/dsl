@@ -21,15 +21,15 @@ def test_imports():
 
 @pytest.fixture
 def sample_config():
-    """Return a sample configuration for testing."""
+    """Sample configuration for testing."""
     return {
-        'version': '1.0',
-        'routes': [
+        "version": "1.0",
+        "routes": [
             {
-                'id': 'test_route',
-                'from': 'test_source',
-                'to': ['test_destination'],
-                'processors': ['test_processor']
+                "name": "test_route",  
+                "from": "timer:1s",
+                "to": ["log:test"],
+                "processors": ["transform_processor"]
             }
         ]
     }

@@ -1,6 +1,21 @@
 version: '3.8'
 
+networks:
+  taskinity-network:
+    driver: bridge
+
 services:
+  # Mail Server for Testing (MailHog)
+  mailserver:
+    image: mailhog/mailhog:latest
+    container_name: mailhog
+    ports:
+      - "1025:1025" # SMTP server
+      - "8025:8025" # Web UI
+    restart: unless-stopped
+    networks:
+      - taskinity-network
+
   # Taskinity DSL Service
   taskinity-dsl:
     build:
@@ -12,10 +27,15 @@ services:
       - ./logs:/app/logs
       - ./output:/app/output
       - ./config:/app/config
+      - ./test_emails:/app/test_emails
     environment:
       - PYTHONPATH=/app
       - LOG_LEVEL=INFO
       - OUTPUT_DIR=/app/output
+      - EMAIL_SERVER=mailserver
+      - EMAIL_PORT=1025
+      - EMAIL_USER=test@example.com
+      - EMAIL_PASSWORD=testpass
     env_file:
       - ./examples/email-invoices/.env
       - ./examples/web-invoices/.env
@@ -29,6 +49,10 @@ services:
     ports:
       - "8000:8000"
     command: ["python", "-m", "taskinity.cli", "--config", "/app/config/email_invoices.yaml"]
+    depends_on:
+      - mailserver
+    networks:
+      - taskinity-network
 
   # Email Invoice Processor Service
   email-processor:
@@ -40,15 +64,23 @@ services:
       - ./shared:/app/shared
       - ./logs/email:/app/logs
       - ./output/email:/app/output
+      - ./test_emails:/app/test_emails
     environment:
       - PYTHONPATH=/app
       - CONFIG_FILE=/app/config/email_invoices.yaml
-      - LOG_LEVEL=INFO
+      - LOG_LEVEL=DEBUG
       - OUTPUT_DIR=/app/output
+      - EMAIL_SERVER=mailserver
+      - EMAIL_PORT=1025
+      - EMAIL_USER=test@example.com
+      - EMAIL_PASSWORD=testpass
     env_file:
       - ./examples/email-invoices/.env
     restart: unless-stopped
     depends_on:
+      - mailserver
+    networks:
+      - taskinity-network
       - taskinity-dsl
     command: ["python", "-m", "taskinity.runner", "--config", "/app/config/email_invoices.yaml"]
 

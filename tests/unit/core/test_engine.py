@@ -77,8 +77,9 @@ class TestCamelRouterEngine:
     ])
     def test_parse_uri(self, engine, uri, expected):
         """Test URI parsing."""
-        from camel_router.engine import parse_uri
-        assert parse_uri(uri) == expected
+        # Test the URI parsing utility function directly
+        from camel_router.engine import parse_uri as engine_parse_uri
+        assert engine_parse_uri(uri) == expected
 
     def test_resolve_variables(self, engine):
         """Test environment variable resolution."""
@@ -108,21 +109,17 @@ class TestCamelRouterEngine:
         mock_destination = AsyncMock()
         
         # Patch the creation methods
-        with patch('camel_router.engine.parse_uri') as mock_parse_uri, \
-             patch('camel_router.engine.TimerSource', return_value=mock_source), \
-             patch('camel_router.engine.TransformProcessor', return_value=mock_processor), \
-             patch('camel_router.engine.LogDestination', return_value=mock_destination):
-            
-            # Mock the URI parsing
-            mock_parse_uri.side_effect = [
-                ("timer", "1s"),
-                ("log", "test")
-            ]
+        with patch('camel_router.engine.CamelRouterEngine.create_source', return_value=mock_source) as mock_create_source, \
+             patch('camel_router.engine.CamelRouterEngine.create_processor', return_value=mock_processor) as mock_create_processor, \
+             patch('camel_router.engine.CamelRouterEngine.create_destination', return_value=mock_destination) as mock_create_dest:
             
             # Run the route
             await engine.run_route_config(route_config)
             
             # Verify the flow
+            mock_create_source.assert_called_once_with("timer:1s")
             mock_source.receive.assert_called_once()
+            mock_create_processor.assert_called_once_with("transform")
             mock_processor.process.assert_called_once_with({"test": "data"})
+            mock_create_dest.assert_called_once_with("log:test")
             mock_destination.send.assert_called_once_with({"processed": True})

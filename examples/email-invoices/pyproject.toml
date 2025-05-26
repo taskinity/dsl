@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "email-invoice-processor"
+version = "0.1.0"
+description = "Email invoice processor with OCR capabilities"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Taskinity Team", email = "team@taskinity.com"}
+]
+dependencies = [
+    "python-dotenv>=1.0.0",
+    "pytesseract>=0.3.10",
+    "opencv-python-headless>=4.8.0.76",
+    "pdf2image>=1.16.3",
+    "Pillow>=10.0.0",
+    "numpy>=1.24.3",
+    "python-dateutil>=2.8.2",
+    "email-validator>=2.0.0",
+    "pyyaml>=6.0.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "flake8>=6.1.0",
+    "black>=23.7.0",
+    "isort>=5.12.0",
+    "mypy>=1.5.0",
+    "types-python-dateutil>=2.8.19.14",
+    "types-Pillow>=10.0.3"
+]
+
+[tool.setuptools]
+packages = ["email_processor"]
+package-dir = { "" = "." }
+
+[project.scripts]
+email-processor = "email_processor.process_invoices:main"

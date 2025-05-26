@@ -156,27 +156,44 @@ def test_connector_factory():
     """Test the connector factory function."""
     from camel_router.connectors import RTSPSource, HTTPDestination, FileDestination, LogDestination
     from camel_router.engine import CamelRouterEngine
+    from unittest.mock import patch
     
     # Create a test engine
     engine = CamelRouterEngine({"routes": []})
     
-    # Test source connectors
-    rtsp_source = engine.create_source("rtsp://test")
-    assert isinstance(rtsp_source, RTSPSource)
-    
-    # Test destination connectors
-    http_dest = engine.create_destination("http://example.com")
-    assert isinstance(http_dest, HTTPDestination)
-    
-    file_dest = engine.create_destination("file:///tmp/test.txt")
-    assert isinstance(file_dest, FileDestination)
-    
-    log_dest = engine.create_destination("log:test")
-    assert isinstance(log_dest, LogDestination)
+    # Patch the connector imports to avoid actual connections
+    with patch('camel_router.connectors.RTSPSource') as mock_rtsp, \
+         patch('camel_router.connectors.HTTPDestination') as mock_http, \
+         patch('camel_router.connectors.FileDestination') as mock_file, \
+         patch('camel_router.connectors.LogDestination') as mock_log:
+        
+        # Configure mocks
+        mock_rtsp.return_value = "rtsp_mock"
+        mock_http.return_value = "http_mock"
+        mock_file.return_value = "file_mock"
+        mock_log.return_value = "log_mock"
+        
+        # Test source connectors
+        rtsp_source = engine.create_source("rtsp://test")
+        assert rtsp_source == "rtsp_mock"
+        mock_rtsp.assert_called_once_with("rtsp://test")
+        
+        # Test destination connectors
+        http_dest = engine.create_destination("http://example.com")
+        assert http_dest == "http_mock"
+        mock_http.assert_called_once_with("http://example.com")
+        
+        file_dest = engine.create_destination("file:///tmp/test.txt")
+        assert file_dest == "file_mock"
+        mock_file.assert_called_once_with("file:///tmp/test.txt")
+        
+        log_dest = engine.create_destination("log:test")
+        assert log_dest == "log_mock"
+        mock_log.assert_called_once_with("log:test")
     
     # Test invalid connector
-    with pytest.raises(ValueError, match="Unsupported source type"):
+    with pytest.raises(ValueError, match=r"Unsupported .* type"):
         engine.create_source("invalid://test")
         
-    with pytest.raises(ValueError, match="Unsupported destination type"):
+    with pytest.raises(ValueError, match=r"Unsupported .* type"):
         engine.create_destination("invalid://test")

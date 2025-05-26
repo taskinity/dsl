@@ -1,23 +1,56 @@
 # Email Invoice Processor
 
-This is an email invoice processor that demonstrates how to use the Taskinity DSL for processing email attachments with local OCR processing.
+This is an email invoice processor that demonstrates how to use the Taskinity DSL for processing email attachments with local OCR processing. The processor can be run both locally and in Docker containers.
 
 ## Features
 
 - Fetches emails from IMAP server
-- Processes email attachments (PDF, JPG, PNG)
+- Processes email attachments (PDF, JPG, PNG, TIFF, BMP)
 - Local OCR processing with Tesseract
 - Extracts invoice data to structured format
 - Configurable through YAML and environment variables
+- Docker support for easy setup and testing
+- Test environment with sample emails
 
 ## Prerequisites
 
+### For Local Development
 - Python 3.8+
 - Tesseract OCR
 - Poppler Utils (for PDF processing)
 - Required Python packages (see `requirements.txt`)
 
-## Installation
+### For Docker (Recommended)
+- Docker 20.10+
+- Docker Compose 2.0+
+
+## Quick Start with Docker
+
+The easiest way to get started is using Docker Compose, which will set up everything you need, including a test mail server:
+
+```bash
+# Navigate to the project root
+cd /path/to/taskinity-dsl
+
+# Start all services in detached mode
+docker-compose -f examples/docker-compose.yml up -d
+
+# View the MailHog web interface at http://localhost:8025
+# The email processor will be running and processing emails
+
+# Load test emails into the mail server
+./test_scripts/load_test_emails.sh
+
+# View the email processor logs
+docker logs -f email-invoice-processor
+```
+
+### Services
+- **MailHog**: Test SMTP server with web UI (http://localhost:8025)
+- **Email Processor**: Processes incoming emails and extracts invoice data
+- **Taskinity DSL**: Main application service
+
+## Development Setup
 
 1. Clone the repository:
    ```bash
@@ -25,40 +58,52 @@ This is an email invoice processor that demonstrates how to use the Taskinity DS
    cd taskinity-dsl/examples/email-invoices
    ```
 
-2. Install system dependencies:
+2. Set up the development environment:
    ```bash
-   # Ubuntu/Debian
+   # Install system dependencies (Ubuntu/Debian)
    sudo apt-get update && sudo apt-get install -y \
        tesseract-ocr tesseract-ocr-eng tesseract-ocr-pol \
-       poppler-utils ghostscript
+       poppler-utils ghostscript swaks jq
    
    # Or using the Makefile:
    make install-deps
    ```
 
-3. Install Python dependencies:
+3. Set up the Python environment:
    ```bash
-   pip install -r requirements.txt
+   # Create and activate a virtual environment
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   
+   # Install the package in development mode
+   pip install -e .
+   
+   # Install development dependencies
+   pip install -r requirements-dev.txt
    ```
 
-4. Copy and configure the environment:
+4. Set up the test environment:
    ```bash
-   cp .env.example .env
-   # Edit .env with your email settings
+   # Create necessary directories
+   mkdir -p output/email logs/email
+   
+   # Set up test environment and load test emails
+   ./test_scripts/setup_test_environment.sh
    ```
 
 ## Configuration
 
 ### Environment Variables
 
-Create a `.env` file with the following variables:
+Create a `.env` file in the `email-invoices` directory with the following variables:
 
 ```ini
 # Email Server Configuration
-EMAIL_SERVER=imap.example.com
-EMAIL_PORT=993
-EMAIL_USER=your-email@example.com
-EMAIL_PASSWORD=your-password
+# For local development with MailHog
+EMAIL_SERVER=localhost
+EMAIL_PORT=1025
+EMAIL_USER=test@example.com
+EMAIL_PASSWORD=testpass
 EMAIL_FOLDER=INBOX
 
 # Processing Settings
@@ -132,27 +177,55 @@ make clean
 
 ## Testing
 
-### Unit Tests
+### Running Tests
 
 ```bash
 # Run all tests
-pytest tests/
+make test
 
-# Run with coverage
+# Run a specific test file
+pytest tests/test_email_processor.py -v
+
+# Run with coverage report
 pytest --cov=email_processor tests/
+
+# Run integration tests
+pytest tests/integration/ -v
 ```
 
-### Integration Tests
+### Testing with Docker
 
-1. Start a test email server:
+1. Start the test environment:
    ```bash
-   python -m smtpd -n -c DebuggingServer localhost:1025
+   docker-compose -f examples/docker-compose.yml up -d
    ```
 
-2. Run the processor in test mode:
+2. Load test emails:
    ```bash
-   python -m email_processor --test-mode
+   ./test_scripts/load_test_emails.sh
    ```
+
+3. View logs:
+   ```bash
+   docker logs -f email-invoice-processor
+   ```
+
+4. Access MailHog web interface:
+   - Open http://localhost:8025 in your browser
+   - View processed emails and test results
+
+### Linting and Formatting
+
+```bash
+# Run linter
+make lint
+
+# Format code
+make format
+
+# Check types
+make typecheck
+```
 
 ## Logs
 
