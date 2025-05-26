@@ -1,1 +1,0 @@
-camel-router run -c config.yaml [options]

@@ -1,1 +1,0 @@
-to: "email://{{SMTP_SERVER}}:{{SMTP_PORT}}?user={{SMTP_USER}}&password={{SMTP_PASS}}&to={{RECIPIENTS}}"
