@@ -18,20 +18,53 @@ if ! command -v docker-compose &> /dev/null; then
     exit 1
 fi
 
+# Check if required tools are installed
+if ! command -v swaks &> /dev/null; then
+    echo -e "${YELLOW}swaks is not installed. Test emails cannot be sent.${NC}"
+    echo "Install it with: sudo apt-get install swaks"
+    echo -e "${YELLOW}Continuing without sending test emails...${NC}"
+    SWAKS_INSTALLED=false
+else
+    SWAKS_INSTALLED=true
+fi
+
+# Check if jq is installed
+if ! command -v jq &> /dev/null; then
+    echo -e "${YELLOW}jq is not installed. Some checks will be limited.${NC}"
+    echo "Install it with: sudo apt-get install jq"
+    JQ_INSTALLED=false
+else
+    JQ_INSTALLED=true
+fi
+
 # Check if required services are running
 echo -e "${GREEN}Checking required services...${NC}"
 
 # Check MailHog
 if ! docker ps | grep -q mailhog; then
     echo -e "${YELLOW}MailHog is not running. Starting it now...${NC}"
-    docker-compose -f examples/docker-compose.yml up -d mailserver
+    if [ -f "docker-compose.yml" ]; then
+        docker-compose up -d mailserver
+    elif [ -f "../docker-compose.yml" ]; then
+        docker-compose -f ../docker-compose.yml up -d mailserver
+    else
+        echo -e "${RED}Error: Could not find docker-compose.yml${NC}"
+        exit 1
+    fi
     sleep 2  # Give it a moment to start
 fi
 
 # Check Email Processor
 if ! docker ps | grep -q email-invoice-processor; then
     echo -e "${YELLOW}Email Processor is not running. Starting it now...${NC}"
-    docker-compose -f examples/docker-compose.yml up -d email-processor
+    if [ -f "docker-compose.yml" ]; then
+        docker-compose up -d email-processor
+    elif [ -f "../docker-compose.yml" ]; then
+        docker-compose -f ../docker-compose.yml up -d email-processor
+    else
+        echo -e "${RED}Error: Could not find docker-compose.yml${NC}"
+        exit 1
+    fi
     sleep 2  # Give it a moment to start
 fi
 
@@ -57,11 +90,21 @@ else
 fi
 
 # Check if test emails are loaded
-if [ "$(curl -s http://localhost:8025/api/v2/messages | jq '.count')" -eq 0 ]; then
-    echo -e "${YELLOW}No test emails found. Loading test emails...${NC}"
-    ./test_scripts/load_test_emails.sh
+if [ "$JQ_INSTALLED" = true ]; then
+    email_count=$(curl -s http://localhost:8025/api/v2/messages | jq '.count' 2>/dev/null || echo "0")
+    if [ "$email_count" -eq 0 ]; then
+        echo -e "${YELLOW}No test emails found.${NC}"
+        if [ "$SWAKS_INSTALLED" = true ] && [ -f "./test_scripts/load_test_emails.sh" ]; then
+            echo -e "${YELLOW}Loading test emails...${NC}"
+            ./test_scripts/load_test_emails.sh
+        else
+            echo -e "${YELLOW}Skipping test email loading (swaks not installed or script not found)${NC}"
+        fi
+    else
+        echo -e "${GREEN}✓ $email_count test emails are loaded${NC}"
+    fi
 else
-    echo -e "${GREEN}✓ Test emails are loaded${NC}"
+    echo -e "${YELLOW}jq not installed. Skipping email count check.${NC}"
 fi
 
 # Final status
