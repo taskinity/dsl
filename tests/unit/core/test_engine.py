@@ -34,7 +34,7 @@ class TestCamelRouterEngine:
     @pytest.fixture
     def engine(self, sample_config):
         """Create a CamelRouterEngine instance with sample config."""
-        from camel_router.engine import CamelRouterEngine
+        from dialogchain.engine import CamelRouterEngine
         return CamelRouterEngine(sample_config, verbose=True)
 
     def test_initialization(self, engine, sample_config):
@@ -73,12 +73,12 @@ class TestCamelRouterEngine:
 
     @pytest.mark.parametrize("uri,expected", [
         ("timer:5s", ("timer", "5s")),
-        ("http://example.com/path?param=value", ("http", "//example.com/path?param=value")),
+        ("http://example.com/path?param=value", ("http", "example.com/path?param=value")),
     ])
     def test_parse_uri(self, engine, uri, expected):
         """Test URI parsing."""
         # Test the URI parsing utility function directly
-        from camel_router.engine import parse_uri as engine_parse_uri
+        from dialogchain.engine import parse_uri as engine_parse_uri
         assert engine_parse_uri(uri) == expected
 
     def test_resolve_variables(self, engine):
@@ -99,9 +99,21 @@ class TestCamelRouterEngine:
             "processors": ["transform"]
         }
         
+        # Create test data
+        test_message = {"test": "data"}
+        
+        # Create an async generator function
+        async def mock_async_generator():
+            yield test_message
+            while True:  # Keep the generator alive until cancelled
+                await asyncio.sleep(0.1)
+        
+        # Create the async iterator
+        mock_iterator = mock_async_generator()
+        
         # Mock the components
         mock_source = AsyncMock()
-        mock_source.receive.return_value = [{"test": "data"}]
+        mock_source.receive.return_value = mock_iterator
         
         mock_processor = AsyncMock()
         mock_processor.process.return_value = {"processed": True}
@@ -109,17 +121,28 @@ class TestCamelRouterEngine:
         mock_destination = AsyncMock()
         
         # Patch the creation methods
-        with patch('camel_router.engine.CamelRouterEngine.create_source', return_value=mock_source) as mock_create_source, \
-             patch('camel_router.engine.CamelRouterEngine.create_processor', return_value=mock_processor) as mock_create_processor, \
-             patch('camel_router.engine.CamelRouterEngine.create_destination', return_value=mock_destination) as mock_create_dest:
+        with patch('dialogchain.engine.CamelRouterEngine.create_source', return_value=mock_source) as mock_create_source, \
+             patch('dialogchain.engine.CamelRouterEngine.create_processor', return_value=mock_processor) as mock_create_processor, \
+             patch('dialogchain.engine.CamelRouterEngine.create_destination', return_value=mock_destination) as mock_create_dest:
             
             # Run the route
-            await engine.run_route_config(route_config)
+            task = asyncio.create_task(engine.run_route_config(route_config))
+            
+            # Wait for the message to be processed
+            await asyncio.sleep(0.1)
+            
+            # Cancel the task to stop the infinite loop
+            task.cancel()
+            
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass  # Expected since we're canceling the task
             
             # Verify the flow
             mock_create_source.assert_called_once_with("timer:1s")
             mock_source.receive.assert_called_once()
             mock_create_processor.assert_called_once_with("transform")
-            mock_processor.process.assert_called_once_with({"test": "data"})
+            mock_processor.process.assert_called_once_with(test_message)
             mock_create_dest.assert_called_once_with("log:test")
             mock_destination.send.assert_called_once_with({"processed": True})

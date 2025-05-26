@@ -19,7 +19,6 @@ This example demonstrates IoT device communication patterns using Taskinity DSL,
 
 ### Using Make (Recommended)
 
-
 ```bash
 # Start MQTT broker and device simulators
 make run-example EXAMPLE=iot
@@ -34,6 +33,7 @@ make stop-example EXAMPLE=iot
 ### Manual Execution
 
 1. Start the MQTT broker:
+
    ```bash
    docker-compose -f examples/docker-compose.yml up -d mosquitto
    ```

@@ -13,9 +13,9 @@ Features:
 - Easy deployment and scaling
 
 Usage:
-    camel-router run -c routes.yaml
-    camel-router init --template camera
-    camel-router validate -c routes.yaml
+    dialogchain run -c routes.yaml
+    dialogchain init --template camera
+    dialogchain validate -c routes.yaml
 """
 
 __version__ = "0.1.0"

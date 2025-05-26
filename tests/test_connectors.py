@@ -4,7 +4,7 @@ Tests for connectors (sources and destinations)
 import pytest
 import asyncio
 from unittest.mock import Mock, patch, AsyncMock
-from camel_router.connectors import (
+from dialogchain.connectors import (
     TimerSource, FileSource, EmailDestination, 
     HTTPDestination, LogDestination
 )

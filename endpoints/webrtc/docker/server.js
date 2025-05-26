@@ -1,35 +1,35 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const path = require('path');
+const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
+const path = require("path");
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: "*",
-    methods: ["GET", "POST"]
-  }
+    methods: ["GET", "POST"],
+  },
 });
 
 // Serve static files
-app.use(express.static('public'));
+app.use(express.static("public"));
 
 // WebSocket connection handler
-io.on('connection', (socket) => {
-  console.log('New client connected:', socket.id);
+io.on("connection", (socket) => {
+  console.log("New client connected:", socket.id);
 
   // Handle signaling
-  socket.on('signal', (data) => {
-    socket.broadcast.emit('signal', {
+  socket.on("signal", (data) => {
+    socket.broadcast.emit("signal", {
       ...data,
-      from: socket.id
+      from: socket.id,
     });
   });
 
   // Handle disconnection
-  socket.on('disconnect', () => {
-    console.log('Client disconnected:', socket.id);
+  socket.on("disconnect", () => {
+    console.log("Client disconnected:", socket.id);
   });
 });
 

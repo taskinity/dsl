@@ -33,22 +33,26 @@ output/
 1. Install system dependencies:
 
    On Ubuntu/Debian:
+
    ```bash
    sudo apt update
    sudo apt install tesseract-ocr poppler-utils
    ```
 
    On macOS (using Homebrew):
+
    ```bash
    brew install tesseract poppler
    ```
 
 2. Set up the development environment using Make:
+
    ```bash
    make setup
    ```
-   
+
    This will:
+
    - Create a Python virtual environment
    - Install all required dependencies
    - Set up development tools
@@ -56,11 +60,13 @@ output/
 ## Configuration
 
 1. Copy the example environment file:
+
    ```bash
    cp .env.example .env
    ```
 
 2. Edit `.env` with your provider credentials and settings. Here's an example configuration:
+
    ```ini
    # General Settings
    YEAR=2025
@@ -68,30 +74,31 @@ output/
    OUTPUT_DIR=./output
    LOG_LEVEL=INFO
    LOG_FILE=web_invoice_processor.log
-   
+
    # Example Provider
    EXAMPLE_PROVIDER_USERNAME=your_username
    EXAMPLE_PROVIDER_PASSWORD=your_password
-   
+
    # AWS Provider
    AWS_ACCESS_KEY_ID=your_aws_access_key
    AWS_SECRET_ACCESS_KEY=your_aws_secret_key
-   
+
    # Google Cloud Provider
    GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
-   
+
    # Azure Provider
    AZURE_SUBSCRIPTION_ID=your_subscription_id
    AZURE_CLIENT_ID=your_client_id
    AZURE_CLIENT_SECRET=your_client_secret
    AZURE_TENANT_ID=your_tenant_id
    ```
-   
+
    > **Note**: Only include the configuration sections for the providers you plan to use.
 
 ## Usage
 
 ### Using Make (recommended)
+
 ```bash
 # List available providers
 make providers
@@ -139,11 +146,12 @@ make clean       # Clean up temporary files
 To add support for a new provider:
 
 1. Create a new method in the `WebInvoiceProcessor` class following this pattern:
+
    ```python
    def _process_PROVIDER_NAME(self, credentials: Dict) -> List[Dict]:
        """Process invoices from PROVIDER_NAME."""
        invoices = []
-       
+
        try:
            # 1. Authenticate with the provider's API/website
            # 2. Retrieve list of invoices for the target month
@@ -153,7 +161,7 @@ To add support for a new provider:
            #    - Amount
            #    - Download URL
            #    - Any additional metadata
-           
+
            # Example:
            invoice_data = {
                'invoice_number': 'INV-123',
@@ -167,10 +175,10 @@ To add support for a new provider:
                }
            }
            invoices.append(invoice_data)
-           
+
        except Exception as e:
            logger.error(f"Error processing PROVIDER_NAME: {e}")
-       
+
        return invoices
    ```
 

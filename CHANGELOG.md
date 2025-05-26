@@ -8,28 +8,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Initial project structure and documentation
-- Development environment setup with Poetry
-- Testing infrastructure with pytest and coverage
-- Code quality tools (Black, isort, Flake8, Mypy)
-- GitHub Actions workflow for CI/CD
-- Documentation for contributors
 
-### Changed
-- Reorganized project structure for better modularity
-- Updated Python package configuration
-- Improved error handling and logging
+- Renamed project from Taskinity DSL to DialogChain
+- New project focus on dialog systems and conversational AI
+- Added support for NLP and dialog management
+- New documentation structure and examples
 
-### Fixed
-- Various bug fixes and performance improvements
-
-## [0.1.0] - YYYY-MM-DD
+## [0.1.0] - 2025-05-26
 
 ### Added
-- Initial release of Taskinity DSL
+
+- Initial release of DialogChain (formerly Taskinity DSL)
+- Core framework for building dialog systems
+- Support for multiple programming languages
+- Flexible configuration system
+- Comprehensive testing infrastructure
 
 ### Changed
+
+- Renamed Python package from `camel_router` to `dialogchain`
+- Updated all documentation and examples
+- Restructured project to better support dialog processing
+- Improved error handling and logging for conversational flows
 - N/A
 
 ### Fixed
+
 - N/A

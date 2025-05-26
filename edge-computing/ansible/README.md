@@ -36,6 +36,7 @@ ansible/
 1. Edit the inventory file (`inventory/hosts.ini`) with your node information
 2. Update variables in `group_vars/all/vars.yml`
 3. Encrypt sensitive data in `group_vars/all/vault.yml` using Ansible Vault:
+
    ```bash
    ansible-vault encrypt group_vars/all/vault.yml
    ```
@@ -60,6 +61,7 @@ Run specific parts of the playbook using tags:
 - `deploy`: All deployment roles
 
 Example:
+
 ```bash
 ansible-playbook -i inventory/hosts.ini site.yml --tags "docker,portainer" --ask-vault-pass
 ```
@@ -75,6 +77,7 @@ ansible-playbook -i inventory/hosts.ini site.yml --tags "docker,portainer" --ask
 ## Backup and Recovery
 
 Backups are configured to run automatically:
+
 - Daily backups with 7-day retention
 - Weekly backups with 30-day retention
 - Monthly backups with 90-day retention

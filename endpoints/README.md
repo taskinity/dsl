@@ -13,16 +13,19 @@ This directory contains mock implementations of various protocol endpoints for t
 ## Quick Start
 
 1. Build all services:
+
    ```bash
    make build
    ```
 
 2. Start all services:
+
    ```bash
    make up
    ```
 
 3. Run tests:
+
    ```bash
    make test
    ```
@@ -70,11 +73,13 @@ This directory contains mock implementations of various protocol endpoints for t
 ## Testing with Ansible
 
 Run all tests:
+
 ```bash
 ansible-playbook -i inventory.ini test.yml
 ```
 
 Run specific service tests:
+
 ```bash
 ansible-playbook -i inventory.ini test.yml --tags rtsp
 ansible-playbook -i inventory.ini test.yml --tags http

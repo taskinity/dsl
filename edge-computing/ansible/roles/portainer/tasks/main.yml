@@ -7,14 +7,14 @@
     state: directory
     owner: root
     group: docker
-    mode: '0775'
+    mode: "0775"
   tags: [portainer, directories]
 
 - name: Create Portainer docker-compose file
   template:
     src: docker-compose.yml.j2
     dest: /etc/docker/compose/portainer/docker-compose.yml
-    mode: '0640'
+    mode: "0640"
   tags: [portainer, config]
   notify: restart portainer
 

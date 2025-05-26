@@ -20,7 +20,7 @@ routes:
     from: "timer://5s"
     processors:
       - type: "external"
-        command: "echo '{\"processed\": true}'"
+        command: 'echo ''{"processed": true}'''
         input_format: "json"
         output_format: "json"
     to: "log://test_external.log"

@@ -85,78 +85,78 @@ spec:
         app: camel-router
     spec:
       containers:
-      - name: camel-router
-        image: camel-router:latest
-        imagePullPolicy: Always
-        command: ["camel-router"]
-        args: ["run", "-c", "/config/routes.yaml", "--verbose"]
+        - name: camel-router
+          image: camel-router:latest
+          imagePullPolicy: Always
+          command: ["camel-router"]
+          args: ["run", "-c", "/config/routes.yaml", "--verbose"]
 
-        # Resource limits for ML workloads
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "500m"
-          limits:
-            memory: "2Gi"
-            cpu: "2000m"
+          # Resource limits for ML workloads
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "2000m"
 
-        # Environment variables from secrets and config
-        env:
-        - name: CAMERA_IP
-          value: "192.168.1.100"
-        - name: CAMERA_NAME
-          value: "k8s-camera"
-        - name: SMTP_SERVER
-          value: "smtp.gmail.com"
-        - name: SMTP_PORT
-          value: "587"
-        - name: SECURITY_EMAIL
-          value: "security@yourcompany.com"
+          # Environment variables from secrets and config
+          env:
+            - name: CAMERA_IP
+              value: "192.168.1.100"
+            - name: CAMERA_NAME
+              value: "k8s-camera"
+            - name: SMTP_SERVER
+              value: "smtp.gmail.com"
+            - name: SMTP_PORT
+              value: "587"
+            - name: SECURITY_EMAIL
+              value: "security@yourcompany.com"
 
-        envFrom:
-        - secretRef:
-            name: camel-router-secrets
+          envFrom:
+            - secretRef:
+                name: camel-router-secrets
 
-        # Mount configuration
-        volumeMounts:
-        - name: config-volume
-          mountPath: /config
-        - name: logs-volume
-          mountPath: /app/logs
-        - name: shared-storage
-          mountPath: /app/shared
+          # Mount configuration
+          volumeMounts:
+            - name: config-volume
+              mountPath: /config
+            - name: logs-volume
+              mountPath: /app/logs
+            - name: shared-storage
+              mountPath: /app/shared
 
-        # Health checks
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8080
-          initialDelaySeconds: 30
-          periodSeconds: 10
+          # Health checks
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
 
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: 8080
-          initialDelaySeconds: 5
-          periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
 
-        # Security context
-        securityContext:
-          runAsUser: 1000
-          runAsGroup: 1000
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: false
+          # Security context
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
 
       volumes:
-      - name: config-volume
-        configMap:
-          name: camel-router-config
-      - name: logs-volume
-        emptyDir: {}
-      - name: shared-storage
-        persistentVolumeClaim:
-          claimName: camel-router-pvc
+        - name: config-volume
+          configMap:
+            name: camel-router-config
+        - name: logs-volume
+          emptyDir: {}
+        - name: shared-storage
+          persistentVolumeClaim:
+            claimName: camel-router-pvc
 
       # Node selector for GPU nodes (if needed)
       nodeSelector:
@@ -164,10 +164,10 @@ spec:
 
       # Tolerations for dedicated ML nodes
       tolerations:
-      - key: "ml-workload"
-        operator: "Equal"
-        value: "true"
-        effect: "NoSchedule"
+        - key: "ml-workload"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
 
 ---
 apiVersion: v1
@@ -179,12 +179,12 @@ spec:
   selector:
     app: camel-router
   ports:
-  - name: http
-    port: 8080
-    targetPort: 8080
-  - name: metrics
-    port: 9090
-    targetPort: 9090
+    - name: http
+      port: 8080
+      targetPort: 8080
+    - name: metrics
+      port: 9090
+      targetPort: 9090
   type: ClusterIP
 
 ---
@@ -216,26 +216,26 @@ spec:
   minReplicas: 2
   maxReplicas: 10
   metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 70
-  - type: Resource
-    resource:
-      name: memory
-      target:
-        type: Utilization
-        averageUtilization: 80
-  # Custom metrics for ML workloads
-  - type: External
-    external:
-      metric:
-        name: camera_queue_length
-      target:
-        type: Value
-        value: "10"
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+    # Custom metrics for ML workloads
+    - type: External
+      external:
+        metric:
+          name: camera_queue_length
+        target:
+          type: Value
+          value: "10"
 
 ---
 # ServiceMonitor for Prometheus monitoring
@@ -249,9 +249,9 @@ spec:
     matchLabels:
       app: camel-router
   endpoints:
-  - port: metrics
-    interval: 30s
-    path: /metrics
+    - port: metrics
+      interval: 30s
+      path: /metrics
 
 ---
 # Network Policy for security
@@ -265,18 +265,18 @@ spec:
     matchLabels:
       app: camel-router
   policyTypes:
-  - Ingress
-  - Egress
+    - Ingress
+    - Egress
   ingress:
-  - from:
-    - namespaceSelector:
-        matchLabels:
-          name: monitoring
-    ports:
-    - protocol: TCP
-      port: 9090
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+      ports:
+        - protocol: TCP
+          port: 9090
   egress:
-  - {} # Allow all egress for external services
+    - {} # Allow all egress for external services
 
 ---
 # Pod Disruption Budget for high availability

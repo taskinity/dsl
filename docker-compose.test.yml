@@ -1,20 +1,21 @@
-version: '3.8'
+version: "3.8"
 
 services:
   rtsp-simple-server:
     image: aler9/rtsp-simple-server:latest
     container_name: rtsp-simple-server
     ports:
-      - "8554:8554"  # RTSP port
-      - "1935:1935"  # RTMP port
-      - "8888:8888"  # HTTP port for HLS and metrics
+      - "8554:8554" # RTSP port
+      - "1935:1935" # RTMP port
+      - "8888:8888" # HTTP port for HLS and metrics
     volumes:
       - ./test_video.mp4:/test_video.mp4
     command: >
       /mediamtx /test_video.mp4
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8888/v1/config/get"]
+      test:
+        ["CMD", "wget", "--spider", "-q", "http://localhost:8888/v1/config/get"]
       interval: 5s
       timeout: 5s
       retries: 5

@@ -4,10 +4,10 @@ print("\nPython path:")
 for path in sys.path:
     print(f"  - {path}")
 
-print("\nAttempting to import camel_router...")
+print("\nAttempting to import dialogchain...")
 try:
-    import camel_router
-    print("✅ Successfully imported camel_router!")
-    print(f"Version: {camel_router.__version__}")
+    import dialogchain
+    print("✅ Successfully imported dialogchain!")
+    print(f"Version: {dialogchain.__version__}")
 except Exception as e:
-    print(f"❌ Error importing camel_router: {e}")
+    print(f"❌ Error importing dialogchain: {e}")

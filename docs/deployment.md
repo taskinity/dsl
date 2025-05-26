@@ -100,12 +100,14 @@ docker run -it --rm \
 ### Docker Image Variants
 
 #### Production Image (`camel-router:latest`)
+
 - Optimized for size and security
 - Multi-stage build
 - Non-root user
 - Minimal dependencies
 
 #### Development Image (`camel-router:dev`)
+
 - Includes development tools
 - Debugging utilities
 - Full build environment
@@ -115,7 +117,7 @@ docker run -it --rm \
 ### Basic Setup
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   camel-router:
@@ -146,7 +148,7 @@ services:
 ### Full Stack with Monitoring
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   camel-router:
@@ -301,20 +303,20 @@ metadata:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   tls:
-  - hosts:
-    - camel-router.yourdomain.com
-    secretName: camel-router-tls
+    - hosts:
+        - camel-router.yourdomain.com
+      secretName: camel-router-tls
   rules:
-  - host: camel-router.yourdomain.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: camel-router-service
-            port:
-              number: 8080
+    - host: camel-router.yourdomain.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: camel-router-service
+                port:
+                  number: 8080
 ```
 
 ### Horizontal Pod Autoscaler
@@ -332,18 +334,18 @@ spec:
   minReplicas: 2
   maxReplicas: 10
   metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 70
-  - type: Resource
-    resource:
-      name: memory
-      target:
-        type: Utilization
-        averageUtilization: 80
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
 ```
 
 ## Cloud Platforms
@@ -450,9 +452,9 @@ spec:
     matchLabels:
       app: camel-router
   endpoints:
-  - port: metrics
-    interval: 30s
-    path: /metrics
+    - port: metrics
+      interval: 30s
+      path: /metrics
 ```
 
 ### Logging
@@ -470,11 +472,11 @@ spec:
   template:
     spec:
       containers:
-      - name: fluentd
-        image: fluent/fluentd-kubernetes-daemonset:v1-debian-elasticsearch
-        env:
-        - name: ELASTICSEARCH_HOST
-          value: "elasticsearch.logging.svc.cluster.local"
+        - name: fluentd
+          image: fluent/fluentd-kubernetes-daemonset:v1-debian-elasticsearch
+          env:
+            - name: ELASTICSEARCH_HOST
+              value: "elasticsearch.logging.svc.cluster.local"
 ```
 
 ### Distributed Tracing
@@ -489,11 +491,11 @@ spec:
   template:
     spec:
       containers:
-      - name: jaeger
-        image: jaegertracing/all-in-one:latest
-        ports:
-        - containerPort: 16686
-        - containerPort: 14268
+        - name: jaeger
+          image: jaegertracing/all-in-one:latest
+          ports:
+            - containerPort: 16686
+            - containerPort: 14268
 ```
 
 ### Alerting Rules
@@ -506,25 +508,25 @@ metadata:
   name: camel-router-alerts
 spec:
   groups:
-  - name: camel-router
-    rules:
-    - alert: CamelRouterDown
-      expr: up{job="camel-router"} == 0
-      for: 1m
-      labels:
-        severity: critical
-      annotations:
-        summary: "Camel Router is down"
-        description: "Camel Router has been down for more than 1 minute"
-    
-    - alert: HighErrorRate
-      expr: rate(camel_router_errors_total[5m]) > 0.1
-      for: 2m
-      labels:
-        severity: warning
-      annotations:
-        summary: "High error rate detected"
-        description: "Error rate is {{ $value }} errors per second"
+    - name: camel-router
+      rules:
+        - alert: CamelRouterDown
+          expr: up{job="camel-router"} == 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Camel Router is down"
+            description: "Camel Router has been down for more than 1 minute"
+
+        - alert: HighErrorRate
+          expr: rate(camel_router_errors_total[5m]) > 0.1
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High error rate detected"
+            description: "Error rate is {{ $value }} errors per second"
 ```
 
 ## Security Considerations
@@ -542,18 +544,18 @@ spec:
     matchLabels:
       app: camel-router
   policyTypes:
-  - Ingress
-  - Egress
+    - Ingress
+    - Egress
   ingress:
-  - from:
-    - namespaceSelector:
-        matchLabels:
-          name: monitoring
-    ports:
-    - protocol: TCP
-      port: 9090
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+      ports:
+        - protocol: TCP
+          port: 9090
   egress:
-  - {} # Allow all egress (customize as needed)
+    - {} # Allow all egress (customize as needed)
 ```
 
 ### Pod Security
@@ -569,9 +571,9 @@ securityContext:
   readOnlyRootFilesystem: true
   capabilities:
     drop:
-    - ALL
+      - ALL
     add:
-    - NET_BIND_SERVICE
+      - NET_BIND_SERVICE
 ```
 
 ### Secret Management
@@ -596,12 +598,12 @@ kind: Role
 metadata:
   name: camel-router-role
 rules:
-- apiGroups: [""]
-  resources: ["configmaps", "secrets"]
-  verbs: ["get", "list", "watch"]
-- apiGroups: ["apps"]
-  resources: ["deployments"]
-  verbs: ["get", "list", "watch", "update"]
+  - apiGroups: [""]
+    resources: ["configmaps", "secrets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch", "update"]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -609,8 +611,8 @@ kind: RoleBinding
 metadata:
   name: camel-router-binding
 subjects:
-- kind: ServiceAccount
-  name: camel-router-sa
+  - kind: ServiceAccount
+    name: camel-router-sa
 roleRef:
   kind: Role
   name: camel-router-role
@@ -648,32 +650,32 @@ spec:
   minReplicas: 2
   maxReplicas: 20
   metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 70
-  - type: Pods
-    pods:
-      metric:
-        name: messages_per_second
-      target:
-        type: AverageValue
-        averageValue: "100"
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Pods
+      pods:
+        metric:
+          name: messages_per_second
+        target:
+          type: AverageValue
+          averageValue: "100"
   behavior:
     scaleUp:
       stabilizationWindowSeconds: 60
       policies:
-      - type: Percent
-        value: 50
-        periodSeconds: 60
+        - type: Percent
+          value: 50
+          periodSeconds: 60
     scaleDown:
       stabilizationWindowSeconds: 300
       policies:
-      - type: Percent
-        value: 10
-        periodSeconds: 60
+        - type: Percent
+          value: 10
+          periodSeconds: 60
 ```
 
 ### Performance Optimization
@@ -700,22 +702,22 @@ affinity:
   nodeAffinity:
     requiredDuringSchedulingIgnoredDuringExecution:
       nodeSelectorTerms:
-      - matchExpressions:
-        - key: node-type
-          operator: In
-          values:
-          - compute-optimized
+        - matchExpressions:
+            - key: node-type
+              operator: In
+              values:
+                - compute-optimized
   podAntiAffinity:
     preferredDuringSchedulingIgnoredDuringExecution:
-    - weight: 100
-      podAffinityTerm:
-        labelSelector:
-          matchExpressions:
-          - key: app
-            operator: In
-            values:
-            - camel-router
-        topologyKey: kubernetes.io/hostname
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values:
+                  - camel-router
+          topologyKey: kubernetes.io/hostname
 ```
 
 ### Caching Strategies
@@ -785,16 +787,16 @@ kubectl port-forward service/camel-router-service 9090:9090 -n camel-router
 ```yaml
 # Enable debug logging
 env:
-- name: LOG_LEVEL
-  value: "debug"
-- name: DEBUG_MODE
-  value: "true"
+  - name: LOG_LEVEL
+    value: "debug"
+  - name: DEBUG_MODE
+    value: "true"
 
 # Add debug sidecar
 containers:
-- name: debug
-  image: nicolaka/netshoot
-  command: ["sleep", "infinity"]
+  - name: debug
+    image: nicolaka/netshoot
+    command: ["sleep", "infinity"]
 ```
 
 ### Health Checks
@@ -927,30 +929,35 @@ helm rollback camel-router 1
 ## Best Practices
 
 ### Resource Management
+
 - Set appropriate resource requests and limits
 - Use HPA for automatic scaling
 - Monitor resource usage continuously
 - Implement proper garbage collection
 
 ### Security
+
 - Use least privilege principle
 - Implement network policies
 - Regularly update base images
 - Scan for vulnerabilities
 
 ### Monitoring
+
 - Implement comprehensive health checks
 - Set up alerting for critical metrics
 - Use distributed tracing
 - Monitor business metrics
 
 ### Configuration
+
 - Use GitOps for configuration management
 - Implement configuration validation
 - Use secrets for sensitive data
 - Version control all configurations
 
 ### Testing
+
 - Implement integration tests
 - Use staging environments
 - Perform load testing

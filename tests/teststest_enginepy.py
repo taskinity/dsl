@@ -4,8 +4,8 @@ Tests for the main routing engine
 import pytest
 import asyncio
 from unittest.mock import Mock, patch
-from camel_router.engine import CamelRouterEngine
-from camel_router.exceptions import ConfigurationError, ValidationError
+from dialogchain.engine import CamelRouterEngine
+from dialogchain.exceptions import ConfigurationError, ValidationError
 
 class TestCamelRouterEngine:
     

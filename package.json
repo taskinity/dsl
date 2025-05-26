@@ -1,7 +1,7 @@
 {
-  "name": "camel-router-processors",
-  "version": "1.0.0",
-  "description": "Node.js processors for Camel Router",
+  "name": "dialogchain-processors",
+  "version": "0.1.0",
+  "description": "Node.js processors for DialogChain",
   "main": "business_rules.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -9,13 +9,18 @@
     "format": "prettier --write *.js"
   },
   "keywords": [
-    "camel-router",
-    "processing",
-    "business-rules",
-    "alerting"
+    "dialogchain",
+    "nlp",
+    "dialog",
+    "conversation",
+    "processing"
   ],
-  "author": "Camel Router Team",
+  "author": "DialogChain Team",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dialogchain/python.git"
+  },
   "dependencies": {
     "axios": "^1.5.0",
     "lodash": "^4.17.21",

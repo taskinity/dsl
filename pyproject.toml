@@ -3,16 +3,16 @@ requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "camel-router"
+name = "dialogchain"
 version = "0.1.0"
-description = "Apache Camel-style routing engine for multi-language ML/multimedia processing"
+description = "DialogChain - A flexible and extensible dialog processing framework"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.8,<3.12"
 license = {text = "MIT"}
 authors = [
-    {name = "Your Name", email = "you@example.com"},
+    {name = "DialogChain Team", email = "team@dialogchain.org"},
 ]
-keywords = ["routing", "ml", "multimedia", "camel", "processing"]
+keywords = ["dialog", "conversation", "nlp", "processing", "framework"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -23,8 +23,9 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Topic :: Software Development :: Libraries :: Python Modules",
-    "Topic :: Multimedia :: Video",
+    "Topic :: Communications :: Chat",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Text Processing :: Linguistic",
 ]
 
 dependencies = [
@@ -63,17 +64,17 @@ ml = [
 ]
 
 [project.scripts]
-camel-router = "camel_router.cli:main"
+dialogchain = "dialogchain.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/taskinity/camel-router"
-Documentation = "https://camel-router.readthedocs.io"
-Repository = "https://github.com/taskinity/camel-router"
-Issues = "https://github.com/taskinity/camel-router/issues"
+Homepage = "https://github.com/taskinity/dialogchain"
+Documentation = "https://dialogchain.readthedocs.io"
+Repository = "https://github.com/taskinity/dialogchain"
+Issues = "https://github.com/taskinity/dialogchain/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["camel_router*"]
+include = ["dialogchain*"]
 
 [tool.black]
 line-length = 88
@@ -84,7 +85,7 @@ profile = "black"
 multi_line_output = 3
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true

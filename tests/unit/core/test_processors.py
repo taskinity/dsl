@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 # Test the base Processor class
 def test_processor_abstract_class():
     """Test that Processor is an abstract base class."""
-    from camel_router.processors import Processor
+    from dialogchain.processors import Processor
     
     # Test that we can't instantiate the abstract class
     with pytest.raises(TypeError):
@@ -48,7 +48,7 @@ class TestExternalProcessor:
     
     @pytest.fixture
     def processor(self, processor_config):
-        from camel_router.processors import ExternalProcessor
+        from dialogchain.processors import ExternalProcessor
         return ExternalProcessor(processor_config)
     
     @pytest.mark.asyncio
@@ -99,7 +99,7 @@ class TestFilterProcessor:
     
     @pytest.fixture
     def processor(self):
-        from camel_router.processors import FilterProcessor
+        from dialogchain.processors import FilterProcessor
         return FilterProcessor({
             'condition': 'value > 10 and name == "test"',
             'config': {}  # Add default empty config
@@ -125,7 +125,7 @@ class TestTransformProcessor:
     
     @pytest.fixture
     def processor(self):
-        from camel_router.processors import TransformProcessor
+        from dialogchain.processors import TransformProcessor
         return TransformProcessor({
             'template': 'Processed: {{name}} with value {{value}}',
             'output_field': 'transformed',
@@ -151,7 +151,7 @@ class TestAggregateProcessor:
     
     @pytest.fixture
     def processor(self, event_loop):
-        from camel_router.processors import AggregateProcessor
+        from dialogchain.processors import AggregateProcessor
         return AggregateProcessor({
             'strategy': 'collect',
             'timeout': '1s',
@@ -214,7 +214,7 @@ class TestDebugProcessor:
     
     @pytest.fixture
     def processor(self):
-        from camel_router.processors import DebugProcessor
+        from dialogchain.processors import DebugProcessor
         return DebugProcessor({
             'prefix': 'TEST_DEBUG',
             'config': {}  # Add default empty config

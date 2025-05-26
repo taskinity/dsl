@@ -7,7 +7,7 @@
     state: directory
     owner: root
     group: root
-    mode: '0755'
+    mode: "0755"
   with_items:
     - "{{ backup_dir }}"
     - "{{ backup_dir }}/daily"
@@ -28,14 +28,14 @@
   template:
     src: backup.sh.j2
     dest: /usr/local/bin/backup-edge
-    mode: '0755'
+    mode: "0755"
   tags: [backup, scripts]
 
 - name: Configure logrotate for backups
   copy:
     src: backup-logrotate
     dest: /etc/logrotate.d/backup-edge
-    mode: '0644'
+    mode: "0644"
   tags: [backup, config]
 
 - name: Create cron job for daily backups

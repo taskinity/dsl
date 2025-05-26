@@ -1,0 +1,69 @@
+---
+# Ansible playbook to test RTSP stream from mock camera
+- name: Test RTSP Stream from Mock Camera
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Ensure required Python packages are installed
+      pip:
+        name:
+          - opencv-python-headless
+          - numpy
+        state: present
+
+    - name: Create test script to verify RTSP stream
+      copy:
+        dest: /tmp/verify_rtsp.py
+        mode: "0755"
+        content: |
+          #!/usr/bin/env python3
+          import cv2
+          import sys
+
+          def test_rtsp(rtsp_url, timeout=10):
+              print(f"Testing RTSP stream at: {rtsp_url}")
+              cap = cv2.VideoCapture(rtsp_url)
+              
+              # Set timeout in milliseconds
+              cap.set(cv2.CAP_PROP_OPEN_TIMEOUT_MS, 5000)
+              
+              start_time = cv2.getTickCount()
+              success = False
+              
+              while (cv2.getTickCount() - start_time) / cv2.getTickFrequency() < timeout:
+                  ret, frame = cap.read()
+                  if ret:
+                      print("✅ Successfully received frame from RTSP stream")
+                      print(f"Frame dimensions: {frame.shape}")
+                      success = True
+                      break
+                  
+              cap.release()
+              return success
+
+          if __name__ == "__main__":
+              rtsp_url = sys.argv[1] if len(sys.argv) > 1 else "rtsp://localhost:8554/mystream"
+              if not test_rtsp(rtsp_url):
+                  print("❌ Failed to receive frames from RTSP stream")
+                  sys.exit(1)
+
+    - name: Run RTSP stream test
+      command: python3 /tmp/verify_rtsp.py "rtsp://localhost:8554/mystream"
+      register: rtsp_test
+      ignore_errors: yes
+      changed_when: false
+      async: 0
+      poll: 0
+
+    - name: Display test results
+      debug:
+        msg: "✅ RTSP stream test completed successfully"
+      when: rtsp_test.rc == 0
+
+    - name: Display error if test failed
+      debug:
+        msg: "❌ RTSP stream test failed. Make sure the mock camera is running."
+      when: rtsp_test.rc != 0
+      failed_when: rtsp_test.rc != 0

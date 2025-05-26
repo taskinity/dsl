@@ -5,7 +5,7 @@ import pytest
 import tempfile
 import os
 from click.testing import CliRunner
-from camel_router.cli import cli
+from dialogchain.cli import cli
 
 class TestCLI:
     

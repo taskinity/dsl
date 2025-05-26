@@ -22,6 +22,7 @@ This project sets up a complete edge computing infrastructure using Raspberry Pi
 ## Quick Start
 
 1. **Clone the repository**
+
    ```bash
    git clone <your-repo-url>
    cd edge-computing
@@ -50,13 +51,12 @@ This project sets up a complete edge computing infrastructure using Raspberry Pi
 
 ## Accessing Services
 
-| Service     | URL                           | Default Credentials     |
-|-------------|-------------------------------|-------------------------|
-| Portainer   | http://<node-ip>:9000         | admin / changeme        |
-| Gitea      | http://<node-ip>:3000         | admin / admin@local     |
-| Node-RED   | http://<node-ip>:1880         | -                      |
-| InfluxDB   | http://<node-ip>:8086         | admin / admin123       |
-
+| Service   | URL                   | Default Credentials |
+| --------- | --------------------- | ------------------- |
+| Portainer | http://<node-ip>:9000 | admin / changeme    |
+| Gitea     | http://<node-ip>:3000 | admin / admin@local |
+| Node-RED  | http://<node-ip>:1880 | -                   |
+| InfluxDB  | http://<node-ip>:8086 | admin / admin123    |
 
 ## Security
 

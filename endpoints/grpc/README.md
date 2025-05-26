@@ -25,13 +25,13 @@ The service is defined in `protos/example.proto` and includes the following meth
 service Greeter {
   // Simple RPC
   rpc SayHello (HelloRequest) returns (HelloReply) {}
-  
+
   // Server streaming RPC
   rpc StreamData (DataRequest) returns (stream DataResponse) {}
-  
+
   // Client streaming RPC
   rpc ClientStream (stream ClientMessage) returns (ServerResponse) {}
-  
+
   // Bidirectional streaming RPC
   rpc BidirectionalStream (stream ClientMessage) returns (stream ServerResponse) {}
 }
@@ -56,11 +56,13 @@ make docker-run
 #### Running Locally
 
 1. Install dependencies:
+
    ```bash
    pip install -r docker/requirements.txt
    ```
 
 2. Generate gRPC code:
+
    ```bash
    make generate-protos
    ```
@@ -101,6 +103,7 @@ make test
 ### Unary RPC: SayHello
 
 **Request**
+
 ```protobuf
 message HelloRequest {
   string name = 1;
@@ -108,6 +111,7 @@ message HelloRequest {
 ```
 
 **Response**
+
 ```protobuf
 message HelloReply {
   string message = 1;
@@ -118,6 +122,7 @@ message HelloReply {
 ### Server Streaming RPC: StreamData
 
 **Request**
+
 ```protobuf
 message DataRequest {
   int32 count = 1;
@@ -126,6 +131,7 @@ message DataRequest {
 ```
 
 **Response** (stream)
+
 ```protobuf
 message DataResponse {
   int32 id = 1;
@@ -137,6 +143,7 @@ message DataResponse {
 ### Client Streaming RPC: ClientStream
 
 **Request** (stream)
+
 ```protobuf
 message ClientMessage {
   string client_id = 1;
@@ -146,6 +153,7 @@ message ClientMessage {
 ```
 
 **Response**
+
 ```protobuf
 message ServerResponse {
   string server_id = 1;
@@ -158,6 +166,7 @@ message ServerResponse {
 ### Bidirectional Streaming RPC: BidirectionalStream
 
 **Request** (stream)
+
 ```protobuf
 message ClientMessage {
   string client_id = 1;
@@ -167,6 +176,7 @@ message ClientMessage {
 ```
 
 **Response** (stream)
+
 ```protobuf
 message ServerResponse {
   string server_id = 1;

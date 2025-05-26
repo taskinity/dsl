@@ -1,5 +1,5 @@
-# Multi-stage Docker build for Camel Router
-# Supports Python, Go, and other language processors
+# Multi-stage Docker build for DialogChain
+# Supports Python, Go, and other language processors for dialog processing
 
 FROM python:3.11-slim as base
 
@@ -42,7 +42,7 @@ WORKDIR /app
 
 # Copy Python package
 COPY setup.py .
-COPY camel_router/ ./camel_router/
+COPY dialogchain/ ./dialogchain/
 COPY scripts/ ./scripts/
 COPY examples/ ./examples/
 

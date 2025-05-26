@@ -13,10 +13,10 @@
 
   roles:
     - common
-    - { role: docker, tags: ['docker'] }
-    - { role: portainer, tags: ['portainer', 'deploy'] }
-    - { role: gitea, tags: ['gitea', 'deploy'] }
-    - { role: node_red, tags: ['node-red', 'deploy'] }
-    - { role: monitoring, tags: ['monitoring', 'deploy'] }
-    - { role: security, tags: ['security'] }
-    - { role: backup, tags: ['backup'] }
+    - { role: docker, tags: ["docker"] }
+    - { role: portainer, tags: ["portainer", "deploy"] }
+    - { role: gitea, tags: ["gitea", "deploy"] }
+    - { role: node_red, tags: ["node-red", "deploy"] }
+    - { role: monitoring, tags: ["monitoring", "deploy"] }
+    - { role: security, tags: ["security"] }
+    - { role: backup, tags: ["backup"] }

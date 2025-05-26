@@ -1,6 +1,6 @@
 # Development Guide
 
-This document provides guidelines and instructions for developers working on the Taskinity DSL project.
+This document provides guidelines and instructions for developers working on the DialogChain project.
 
 ## 🛠️ Development Setup
 
@@ -14,19 +14,21 @@ This document provides guidelines and instructions for developers working on the
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
-   git clone https://github.com/taskinity/taskinity-dsl.git
-   cd taskinity-dsl
+   git clone https://github.com/dialogchain/python.git
+   cd python
    ```
 
 2. **Set up Python environment**
+
    ```bash
    # Install Poetry if you haven't already
    curl -sSL https://install.python-poetry.org | python3 -
-   
+
    # Install dependencies
    poetry install
-   
+
    # Activate the virtual environment
    poetry shell
    ```
@@ -114,16 +116,19 @@ scripts/             # Utility scripts
 ## 🚀 Development Workflow
 
 1. Create a new branch for your feature/fix:
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
 
 2. Make your changes and commit them with a descriptive message:
+
    ```bash
    git commit -m "Add new feature for X"
    ```
 
 3. Run tests and code quality checks:
+
    ```bash
    make check
    ```
@@ -145,30 +150,26 @@ Add this to your `.vscode/launch.json` for debugging:
 
 ```json
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Python: Current File",
-            "type": "python",
-            "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal",
-            "justMyCode": true
-        },
-        {
-            "name": "Python: Pytest",
-            "type": "python",
-            "request": "launch",
-            "module": "pytest",
-            "args": [
-                "-v",
-                "-s",
-                "${workspaceFolder}/tests"
-            ],
-            "console": "integratedTerminal",
-            "justMyCode": true
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Current File",
+      "type": "python",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "Python: Pytest",
+      "type": "python",
+      "request": "launch",
+      "module": "pytest",
+      "args": ["-v", "-s", "${workspaceFolder}/tests"],
+      "console": "integratedTerminal",
+      "justMyCode": true
+    }
+  ]
 }
 ```
 

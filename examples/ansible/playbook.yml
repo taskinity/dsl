@@ -7,7 +7,7 @@
   vars:
     project_root: "{{ lookup('env', 'PWD') }}"
     python_version: 3.8
-    
+
   tasks:
     - name: Install system dependencies
       apt:
@@ -58,7 +58,7 @@
       file:
         path: "{{ item }}"
         state: directory
-        mode: '0755'
+        mode: "0755"
       with_items:
         - "{{ project_root }}/test_data/emails"
         - "{{ project_root }}/test_data/web_invoices"
@@ -70,10 +70,16 @@
       template:
         src: "{{ item.src }}"
         dest: "{{ item.dest }}"
-        mode: '0644'
+        mode: "0644"
       with_items:
-        - { src: 'templates/email-invoices/.env.j2', dest: '{{ project_root }}/examples/email-invoices/.env' }
-        - { src: 'templates/web-invoices/.env.j2', dest: '{{ project_root }}/examples/web-invoices/.env' }
+        - {
+            src: "templates/email-invoices/.env.j2",
+            dest: "{{ project_root }}/examples/email-invoices/.env",
+          }
+        - {
+            src: "templates/web-invoices/.env.j2",
+            dest: "{{ project_root }}/examples/web-invoices/.env",
+          }
       tags: [config]
 
     - name: Run email processor tests

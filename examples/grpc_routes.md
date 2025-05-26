@@ -33,6 +33,7 @@ make stop-example EXAMPLE=grpc
 ### Manual Execution
 
 1. Start the gRPC server:
+
    ```bash
    python -m src.examples.grpc_server
    ```
@@ -53,7 +54,7 @@ routes:
         synchronous: true
     steps:
       - set-body:
-          json: {"name": "Taskinity User"}
+          json: { "name": "Taskinity User" }
       - to: "log:info"
 ```
 

@@ -1,6 +1,6 @@
-# Contributing to Taskinity DSL
+# Contributing to DialogChain
 
-Thank you for your interest in contributing to Taskinity DSL! We welcome all contributions, whether they're bug reports, feature requests, documentation improvements, or code contributions.
+Thank you for your interest in contributing to DialogChain! We welcome all contributions, whether they're bug reports, feature requests, documentation improvements, or code contributions.
 
 ## 📋 Table of Contents
 
@@ -25,8 +25,8 @@ This project and everyone participating in it is governed by our [Code of Conduc
 
 Bugs are tracked as [GitHub issues](https://guides.github.com/features/issues/). Before creating a new issue:
 
-1. **Check if the issue has already been reported** by searching under [Issues](https://github.com/taskinity/taskinity-dsl/issues).
-2. If you're unable to find an open issue addressing the problem, [open a new one](https://github.com/taskinity/taskinity-dsl/issues/new/choose).
+1. **Check if the issue has already been reported** by searching under [Issues](https://github.com/dialogchain/python/issues).
+2. If you're unable to find an open issue addressing the problem, [open a new one](https://github.com/dialogchain/python/issues/new/choose).
 
 A good bug report includes:
 
@@ -50,8 +50,8 @@ We welcome suggestions for new features or improvements. Before submitting an en
 1. **Fork the repository** on GitHub.
 2. **Clone your fork** locally:
    ```bash
-   git clone https://github.com/your-username/taskinity-dsl.git
-   cd taskinity-dsl
+   git clone https://github.com/your-username/python.git
+   cd python
    ```
 3. **Set up the development environment** (see [DEVELOPMENT.md](DEVELOPMENT.md)).
 4. **Create a branch** for your changes:
@@ -105,6 +105,7 @@ We follow the [Conventional Commits](https://www.conventionalcommits.org/) speci
 ```
 
 Types:
+
 - `feat`: A new feature
 - `fix`: A bug fix
 - `docs`: Documentation only changes
@@ -115,6 +116,7 @@ Types:
 - `chore`: Changes to the build process or auxiliary tools
 
 Example:
+
 ```
 feat(api): add user authentication endpoint
 

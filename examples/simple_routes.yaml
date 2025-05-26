@@ -39,7 +39,7 @@ routes:
           Threat Level: {{threat_level}}
           Detections: {{enhanced_detections|length}}
           Time: {{timestamp}}
-          
+
           Details:
           {{#enhanced_detections}}
           - {{object_type}} in {{zone}} (risk: {{risk_score|round(2)}}) -> {{recommended_action}}

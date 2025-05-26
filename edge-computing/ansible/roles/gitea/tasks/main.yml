@@ -7,7 +7,7 @@
     state: directory
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
-    mode: '0755'
+    mode: "0755"
   with_items:
     - /opt/gitea/data
     - /opt/gitea/config
@@ -17,7 +17,7 @@
   template:
     src: docker-compose.yml.j2
     dest: /etc/docker/compose/gitea/docker-compose.yml
-    mode: '0640'
+    mode: "0640"
   tags: [gitea, config]
   notify: restart gitea
 

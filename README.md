@@ -1,31 +1,31 @@
-# Taskinity DSL - Multi-Language ML/Media Processing Engine
+# DialogChain - Flexible Dialog Processing Framework
 
-🚀 **Apache Camel-style routing engine** for computer vision, machine learning, and multimedia processing pipelines that can delegate tasks to **multiple programming languages**.
+🚀 **DialogChain** is a flexible and extensible framework for building, managing, and deploying dialog systems and conversational AI applications. It supports multiple programming languages and integrates with various NLP and ML models.
 
 ## ✨ Features
 
-- **📹 Real-time Video Processing**: RTSP cameras, streams, file inputs
-- **🤖 Multi-Language Support**: Python, Go, Rust, C++, Node.js processors  
-- **🔗 Flexible Connectors**: Email, HTTP, gRPC, MQTT, file outputs  
-- **🎯 ML-Ready**: Object detection, inference pipelines, TensorFlow integration
-- **⚙️ Simple Configuration**: URL-style routing with .env support
-- **🐳 Cloud Native**: Docker, Kubernetes, horizontal scaling
-- **📊 Production Ready**: Monitoring, health checks, error handling
+- **💬 Dialog Management**: Stateful conversation handling and context management
+- **🤖 Multi-Language Support**: Python, Go, Rust, C++, Node.js processors
+- **🔌 Flexible Connectors**: REST APIs, WebSockets, gRPC, MQTT, and more
+- **🧠 ML/NLP Integration**: Built-in support for popular NLP libraries and models
+- **⚙️ Simple Configuration**: YAML/JSON configuration with environment variables
+- **🐳 Cloud Native**: Docker, Kubernetes, and serverless deployment ready
+- **📊 Production Ready**: Monitoring, logging, and error handling
 - **🧪 Comprehensive Testing**: Unit, integration, and end-to-end tests
 - **🔍 Code Quality**: Type hints, linting, and code formatting
-- **📈 Test Coverage**: Code coverage reporting and enforcement
+- **📈 Scalable**: Horizontal scaling for high-throughput applications
 
 ## 🏗️ Architecture
 
 ```
 ┌─────────────┐    ┌──────────────────┐    ┌─────────────┐
-│   Sources   │    │   Processors     │    │Destinations │
+│   Inputs    │    │   Processors     │    │  Outputs    │
 ├─────────────┤    ├──────────────────┤    ├─────────────┤
-│ RTSP Camera │───►│ Python: YOLO     │───►│ Email Alert │
-│ Timer       │    │ Go: Risk Analysis│    │ HTTP Webhook│
-│ MQTT Sensor │    │ Rust: Preprocessing│   │ MQTT Publish│
-│ File Watch  │    │ C++: Optimization│    │ File Output │
-│ gRPC Server │    │ Node.js: Rules   │    │ Log/Console │
+│ HTTP API    │───►│ NLP Processing   │───►│ REST API    │
+│ WebSocket   │    │ Intent Detection │    │ WebSocket   │
+│ gRPC        │    │ Entity Extraction│    │ gRPC        │
+│ CLI         │    │ Dialog Management│    │ Message Bus │
+│ Message Bus │    │ Response Gen    │    │ Logging     │
 └─────────────┘    └──────────────────┘    └─────────────┘
 ```
 
@@ -45,12 +45,14 @@ make quickstart
 ### 2. Configuration
 
 Create your `.env` file:
+
 ```bash
 # Copy template and edit
 cp .env.example .env
 ```
 
 Example `.env`:
+
 ```bash
 CAMERA_USER=admin
 CAMERA_PASS=your_password
@@ -63,16 +65,18 @@ SECURITY_EMAIL=security@company.com
 ### 3. Create Routes
 
 Generate a configuration template:
+
 ```bash
 camel-router init --template camera --output my_routes.yaml
 ```
 
 Example route (simplified YAML):
+
 ```yaml
 routes:
   - name: "smart_security_camera"
     from: "rtsp://{{CAMERA_USER}}:{{CAMERA_PASS}}@{{CAMERA_IP}}/stream1"
-    
+
     processors:
       # Python: Object detection
       - type: "external"
@@ -80,17 +84,17 @@ routes:
         config:
           confidence_threshold: 0.6
           target_objects: ["person", "car"]
-      
-      # Go: Risk analysis  
+
+      # Go: Risk analysis
       - type: "external"
         command: "go run scripts/image_processor.go"
         config:
           threat_threshold: 0.7
-      
+
       # Filter high-risk only
       - type: "filter"
         condition: "{{threat_level}} == 'high'"
-    
+
     to:
       - "email://{{SMTP_SERVER}}:{{SMTP_PORT}}?user={{SMTP_USER}}&password={{SMTP_PASS}}&to={{SECURITY_EMAIL}}"
       - "http://webhook.company.com/security-alert"
@@ -113,17 +117,18 @@ camel-router run -c my_routes.yaml --dry-run
 
 ### Sources (Input)
 
-| Source | Example URL | Description |
-|--------|-------------|-------------|
-| RTSP Camera | `rtsp://user:pass@ip/stream1` | Live video streams |
-| Timer | `timer://5m` | Scheduled execution |
-| File | `file:///path/to/watch` | File monitoring |
-| gRPC | `grpc://localhost:50051/Service/Method` | gRPC endpoints |
-| MQTT | `mqtt://broker:1883/topic` | MQTT messages |
+| Source      | Example URL                             | Description         |
+| ----------- | --------------------------------------- | ------------------- |
+| RTSP Camera | `rtsp://user:pass@ip/stream1`           | Live video streams  |
+| Timer       | `timer://5m`                            | Scheduled execution |
+| File        | `file:///path/to/watch`                 | File monitoring     |
+| gRPC        | `grpc://localhost:50051/Service/Method` | gRPC endpoints      |
+| MQTT        | `mqtt://broker:1883/topic`              | MQTT messages       |
 
 ### Processors (Transform)
 
 #### External Processors
+
 Delegate to any programming language:
 
 ```yaml
@@ -136,28 +141,28 @@ processors:
     config:
       model: "yolov8n.pt"
       confidence_threshold: 0.6
-  
+
   # Go image processing
   - type: "external"
     command: "go run scripts/image_processor.go"
     config:
       thread_count: 4
       optimization: "speed"
-  
+
   # Rust performance-critical tasks
   - type: "external"
     command: "cargo run --bin data_processor"
     config:
       batch_size: 32
       simd_enabled: true
-  
-  # C++ optimized algorithms  
+
+  # C++ optimized algorithms
   - type: "external"
     command: "./bin/cpp_postprocessor"
     config:
       algorithm: "fast_nms"
       threshold: 0.85
-  
+
   # Node.js business logic
   - type: "external"
     command: "node scripts/business_rules.js"
@@ -172,11 +177,11 @@ processors:
   # Filter messages
   - type: "filter"
     condition: "{{confidence}} > 0.7"
-  
+
   # Transform output
-  - type: "transform" 
+  - type: "transform"
     template: "Alert: {{object_type}} detected at {{position}}"
-  
+
   # Aggregate over time
   - type: "aggregate"
     strategy: "collect"
@@ -186,13 +191,13 @@ processors:
 
 ### Destinations (Output)
 
-| Destination | Example URL | Description |
-|-------------|-------------|-------------|
-| Email | `email://smtp.gmail.com:587?user={{USER}}&password={{PASS}}&to={{EMAILS}}` | SMTP alerts |
-| HTTP | `http://api.company.com/webhook` | REST API calls |
-| MQTT | `mqtt://broker:1883/alerts/camera` | MQTT publishing |
-| File | `file:///logs/alerts.log` | File logging |
-| gRPC | `grpc://service:50051/AlertService/Send` | gRPC calls |
+| Destination | Example URL                                                                | Description     |
+| ----------- | -------------------------------------------------------------------------- | --------------- |
+| Email       | `email://smtp.gmail.com:587?user={{USER}}&password={{PASS}}&to={{EMAILS}}` | SMTP alerts     |
+| HTTP        | `http://api.company.com/webhook`                                           | REST API calls  |
+| MQTT        | `mqtt://broker:1883/alerts/camera`                                         | MQTT publishing |
+| File        | `file:///logs/alerts.log`                                                  | File logging    |
+| gRPC        | `grpc://service:50051/AlertService/Send`                                   | gRPC calls      |
 
 ## 🛠️ Development
 
@@ -271,7 +276,7 @@ make docker-run
 ### Docker Compose (with dependencies)
 
 ```yaml
-version: '3.8'
+version: "3.8"
 services:
   camel-router:
     build: .
@@ -284,12 +289,12 @@ services:
     depends_on:
       - mqtt
       - redis
-  
+
   mqtt:
     image: eclipse-mosquitto:2
     ports:
       - "1883:1883"
-  
+
   redis:
     image: redis:7-alpine
     ports:
@@ -313,6 +318,7 @@ kubectl logs -f deployment/camel-router -n camel-router
 ```
 
 Features in Kubernetes:
+
 - **Horizontal Pod Autoscaling**: Auto-scale based on CPU/memory/custom metrics
 - **Resource Management**: CPU/memory limits and requests
 - **Health Checks**: Liveness and readiness probes
@@ -341,7 +347,7 @@ curl http://localhost:8080/stats
 # View real-time logs
 make logs
 
-# Start monitoring dashboard  
+# Start monitoring dashboard
 make monitor
 ```
 
@@ -359,7 +365,7 @@ make benchmark
 ```bash
 # Camera settings
 CAMERA_USER=admin
-CAMERA_PASS=password  
+CAMERA_PASS=password
 CAMERA_IP=192.168.1.100
 CAMERA_NAME=front_door
 
@@ -392,12 +398,12 @@ METRICS_ENABLED=true
 
 ```yaml
 routes:
-  - name: "route_name"                    # Required: Route identifier
-    from: "source_uri"                    # Required: Input source  
-    processors:                           # Optional: Processing pipeline
+  - name: "route_name" # Required: Route identifier
+    from: "source_uri" # Required: Input source
+    processors: # Optional: Processing pipeline
       - type: "processor_type"
         config: {}
-    to: ["destination_uri"]               # Required: Output destinations
+    to: ["destination_uri"] # Required: Output destinations
 
 # Global settings
 settings:
@@ -416,21 +422,25 @@ env_vars:
 ## 🎯 Use Cases
 
 ### 1. Smart Security System
+
 - **Input**: RTSP cameras, motion sensors
 - **Processing**: Python (YOLO), Go (risk analysis), Node.js (rules)
 - **Output**: Email alerts, mobile push, dashboard
 
 ### 2. Industrial Quality Control
+
 - **Input**: Factory cameras, sensor data
 - **Processing**: Python (defect detection), C++ (performance), Rust (safety)
 - **Output**: MQTT control, database, operator alerts
 
-### 3. IoT Data Pipeline  
+### 3. IoT Data Pipeline
+
 - **Input**: MQTT sensors, HTTP APIs
 - **Processing**: Go (aggregation), Python (analytics), Node.js (business logic)
 - **Output**: Time-series DB, real-time dashboard, alerts
 
 ### 4. Media Processing Pipeline
+
 - **Input**: File uploads, streaming video
 - **Processing**: Python (ML inference), C++ (codec), Rust (optimization)
 - **Output**: CDN upload, metadata database, webhooks
@@ -440,6 +450,7 @@ env_vars:
 ### Common Issues
 
 #### Camera Connection Failed
+
 ```bash
 # Test RTSP connection
 ffmpeg -i rtsp://user:pass@ip/stream1 -frames:v 1 test.jpg
@@ -450,6 +461,7 @@ telnet camera_ip 554
 ```
 
 #### External Processor Errors
+
 ```bash
 # Test processor manually
 echo '{"test": "data"}' | python scripts/detect_objects.py --input /dev/stdin
@@ -462,6 +474,7 @@ camel-router run -c config.yaml --verbose
 ```
 
 #### Performance Issues
+
 ```bash
 # Monitor resource usage
 htop

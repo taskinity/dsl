@@ -5,9 +5,9 @@ import pytest
 import asyncio
 from unittest.mock import patch, MagicMock, AsyncMock
 
-from camel_router.engine import CamelRouterEngine
-from camel_router.processors import Processor, ExternalProcessor, FilterProcessor, TransformProcessor, AggregateProcessor, DebugProcessor
-from camel_router.connectors import Source, Destination
+from dialogchain.engine import CamelRouterEngine
+from dialogchain.processors import Processor, ExternalProcessor, FilterProcessor, TransformProcessor, AggregateProcessor, DebugProcessor
+from dialogchain.connectors import Source, Destination
 
 
 def test_imports():

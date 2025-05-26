@@ -47,21 +47,21 @@
   get_url:
     url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-linux-x86_64"
     dest: /usr/local/bin/docker-compose
-    mode: '0755'
+    mode: "0755"
   tags: [docker, packages]
 
 - name: Create docker-compose directory
   file:
     path: /etc/docker/compose
     state: directory
-    mode: '0755'
+    mode: "0755"
   tags: [docker, config]
 
 - name: Create systemd service for Docker Compose
   template:
     src: docker-compose@.service.j2
     dest: /etc/systemd/system/docker-compose@.service
-    mode: '0644'
+    mode: "0644"
   tags: [docker, systemd]
   notify: reload systemd
 

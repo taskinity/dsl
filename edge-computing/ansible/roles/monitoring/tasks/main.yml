@@ -7,7 +7,7 @@
     state: directory
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
-    mode: '0755'
+    mode: "0755"
   with_items:
     - /opt/monitoring/telegraf
     - /opt/monitoring/influxdb
@@ -17,14 +17,14 @@
   template:
     src: telegraf.conf.j2
     dest: /opt/monitoring/telegraf/telegraf.conf
-    mode: '0644'
+    mode: "0644"
   tags: [monitoring, config]
 
 - name: Create monitoring docker-compose file
   template:
     src: docker-compose.yml.j2
     dest: /etc/docker/compose/monitoring/docker-compose.yml
-    mode: '0640'
+    mode: "0640"
   tags: [monitoring, config]
   notify: restart monitoring
 

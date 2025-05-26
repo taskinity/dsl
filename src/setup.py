@@ -1,9 +1,9 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="camel-router",
+    name="dialogchain",
     version="0.1.0",
-    description="Apache Camel-style routing engine for multi-language processing",
+    description="DialogChain - A flexible and extensible dialog processing framework",
     packages=find_packages(),
     install_requires=[
         "click>=8.0.0",
@@ -17,7 +17,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "camel-router=camel_router.cli:main",
+            "dialogchain=dialogchain.cli:main",
         ],
     },
     python_requires=">=3.8",

@@ -68,8 +68,14 @@ format:
 run:
 	$(PYTHON) -m email_processor --config process_invoices.yaml
 
+# Stop Docker containers and remove volumes
+stop:
+	@echo "Stopping all Docker containers and removing volumes..."
+	@docker-compose -f ../docker-compose.yml down -v --remove-orphans || true
+	@echo "✅ All Docker containers stopped and volumes removed"
+
 # Clean up
-clean:
+clean: stop
 	find . -type d -name '__pycache__' -exec rm -rf {} +
 	find . -type f -name '*.pyc' -delete
 	find . -type f -name '*.pyo' -delete
@@ -78,7 +84,6 @@ clean:
 	find . -type d -name '.coverage' -delete
 	find . -type d -name 'htmlcov' -exec rm -rf {} +
 	find . -type d -name '*.egg-info' -exec rm -rf {} +
-	docker-compose down -v 2>/dev/null || true
 
 # Generate development requirements
 dev-requirements: requirements-dev.txt

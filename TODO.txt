@@ -1,0 +1,95 @@
+# Taskinity DSL - Refactoring and Testing Roadmap
+
+## Phase 1: Project Setup and Structure
+- [ ] Create a proper Python package structure
+  - [ ] Move source code to `src/taskinity/`
+  - [ ] Update `setup.py` with proper package metadata
+  - [ ] Add `pyproject.toml` for modern Python packaging
+
+## Phase 2: Core Refactoring (src/ directory)
+
+### 2.1 API Module Refactoring
+- [ ] Consolidate API modules into a single package
+  - [ ] Merge related modules (e.g., Source_URIs.py and Destination_URIs.py)
+  - [ ] Add proper type hints
+  - [ ] Implement proper error handling hierarchy
+
+### 2.2 Camel Router Refactoring
+- [ ] Refactor `camel_router/` package
+  - [ ] Standardize naming conventions (PEP 8)
+  - [ ] Split large files into smaller modules
+  - [ ] Implement proper dependency injection
+  - [ ] Add comprehensive docstrings
+
+### 2.3 Configuration Management
+- [ ] Unify configuration handling
+  - [ ] Merge configuration modules from different locations
+  - [ ] Implement configuration validation using Pydantic
+  - [ ] Support environment variables and config files
+
+### 2.4 Utils Organization
+- [ ] Reorganize utility functions
+  - [ ] Group related utilities
+  - [ ] Remove duplicate code
+  - [ ] Add proper documentation
+
+## Phase 3: Testing Strategy
+
+### 3.1 Test Infrastructure
+- [ ] Set up testing framework
+  - [ ] Add pytest configuration
+  - [ ] Configure test coverage reporting
+  - [ ] Set up test data fixtures
+
+### 3.2 Unit Tests
+- [ ] Core functionality
+  - [ ] Test configuration loading and validation
+  - [ ] Test route processing logic
+  - [ ] Test utility functions
+
+### 3.3 Integration Tests
+- [ ] Test component interactions
+  - [ ] Test API endpoints
+  - [ ] Test connector integrations
+  - [ ] Test full processing pipelines
+
+### 3.4 E2E Tests
+- [ ] Set up end-to-end test scenarios
+  - [ ] Test complete workflows
+  - [ ] Test error conditions
+  - [ ] Test performance characteristics
+
+## Phase 4: Documentation
+- [ ] Update README.md
+- [ ] Add API documentation
+- [ ] Write developer guides
+- [ ] Document testing procedures
+
+## Phase 5: CI/CD Pipeline
+- [ ] Set up GitHub Actions
+  - [ ] Run tests on push/PR
+  - [ ] Enforce code style
+  - [ ] Generate coverage reports
+  - [ ] Publish packages
+
+## Immediate Next Steps (First Week)
+1. Set up proper Python package structure
+2. Add basic test infrastructure
+3. Start with unit tests for core components
+4. Begin refactoring the most critical modules
+
+## Code Quality Goals
+- 80%+ test coverage
+- Type hints for all public APIs
+- Comprehensive docstrings
+- PEP 8 compliance
+- No critical code smells or security issues
+
+## Dependencies to Add
+- pytest (testing)
+- pytest-cov (coverage)
+- mypy (type checking)
+- black (code formatting)
+- isort (import sorting)
+- flake8 (linting)
+- pydantic (data validation)

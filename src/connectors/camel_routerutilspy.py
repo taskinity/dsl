@@ -14,7 +14,7 @@ def setup_logging(level: str = "INFO") -> logging.Logger:
         level=getattr(logging, level.upper()),
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
-    return logging.getLogger('camel_router')
+    return logging.getLogger('dialogchain')
 
 def ensure_directory(path: str) -> Path:
     """Ensure directory exists"""

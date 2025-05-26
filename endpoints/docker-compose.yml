@@ -1,12 +1,12 @@
-version: '3.8'
+version: "3.8"
 
 services:
   rtsp-server:
     build: ./rtsp/docker
     container_name: rtsp-mock
     ports:
-      - "8554:8554"  # RTSP
-      - "8888:8888"  # HTTP
+      - "8554:8554" # RTSP
+      - "8888:8888" # HTTP
     restart: unless-stopped
     networks:
       - mock-network
@@ -33,13 +33,19 @@ services:
     build: ./grpc/docker
     container_name: grpc-mock
     ports:
-      - "50051:50051"  # gRPC
-      - "8000:8000"    # Prometheus metrics
+      - "50051:50051" # gRPC
+      - "8000:8000" # Prometheus metrics
     restart: unless-stopped
     networks:
       - mock-network
     healthcheck:
-      test: ["CMD", "python", "-c", "import grpc; channel = grpc.insecure_channel('localhost:50051'); import example_pb2, example_pb2_grpc; stub = example_pb2_grpc.GreeterStub(channel); response = stub.SayHello(example_pb2.HelloRequest(name='healthcheck'), timeout=5)"]
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import grpc; channel = grpc.insecure_channel('localhost:50051'); import example_pb2, example_pb2_grpc; stub = example_pb2_grpc.GreeterStub(channel); response = stub.SayHello(example_pb2.HelloRequest(name='healthcheck'), timeout=5)",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -48,8 +54,8 @@ services:
     build: ./mqtt/docker
     container_name: mqtt-mock
     ports:
-      - "1883:1883"  # MQTT
-      - "9001:9001"  # MQTT over WebSocket
+      - "1883:1883" # MQTT
+      - "9001:9001" # MQTT over WebSocket
     restart: unless-stopped
     networks:
       - mock-network

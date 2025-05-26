@@ -15,12 +15,14 @@ This is an email invoice processor that demonstrates how to use the Taskinity DS
 ## Prerequisites
 
 ### For Local Development
+
 - Python 3.8+
 - Tesseract OCR
 - Poppler Utils (for PDF processing)
 - Required Python packages (see `requirements.txt`)
 
 ### For Docker (Recommended)
+
 - Docker 20.10+
 - Docker Compose 2.0+
 
@@ -46,6 +48,7 @@ docker logs -f email-invoice-processor
 ```
 
 ### Services
+
 - **MailHog**: Test SMTP server with web UI (http://localhost:8025)
 - **Email Processor**: Processes incoming emails and extracts invoice data
 - **Taskinity DSL**: Main application service
@@ -53,40 +56,44 @@ docker logs -f email-invoice-processor
 ## Development Setup
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/taskinity/taskinity-dsl.git
    cd taskinity-dsl/examples/email-invoices
    ```
 
 2. Set up the development environment:
+
    ```bash
    # Install system dependencies (Ubuntu/Debian)
    sudo apt-get update && sudo apt-get install -y \
        tesseract-ocr tesseract-ocr-eng tesseract-ocr-pol \
        poppler-utils ghostscript swaks jq
-   
+
    # Or using the Makefile:
    make install-deps
    ```
 
 3. Set up the Python environment:
+
    ```bash
    # Create and activate a virtual environment
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
-   
+
    # Install the package in development mode
    pip install -e .
-   
+
    # Install development dependencies
    pip install -r requirements-dev.txt
    ```
 
 4. Set up the test environment:
+
    ```bash
    # Create necessary directories
    mkdir -p output/email logs/email
-   
+
    # Set up test environment and load test emails
    ./test_scripts/setup_test_environment.sh
    ```
@@ -124,7 +131,7 @@ The main configuration is in `process_invoices.yaml`. Key sections:
 ```yaml
 email:
   server: "{{EMAIL_SERVER}}"
-  port: {{EMAIL_PORT|int}}
+  port: { { EMAIL_PORT|int } }
   username: "{{EMAIL_USER}}"
   password: "{{EMAIL_PASSWORD}}"
   folder: "{{EMAIL_FOLDER|default('INBOX')}}"
@@ -133,7 +140,7 @@ processing:
   output_dir: "{{OUTPUT_DIR|default('./output')}}"
   processed_folder: "{{PROCESSED_FOLDER|default('Processed')}}"
   error_folder: "{{ERROR_FOLDER|default('Errors')}}"
-  
+
 ocr:
   engine: "tesseract"
   config:
@@ -196,16 +203,19 @@ pytest tests/integration/ -v
 ### Testing with Docker
 
 1. Start the test environment:
+
    ```bash
    docker-compose -f examples/docker-compose.yml up -d
    ```
 
 2. Load test emails:
+
    ```bash
    ./test_scripts/load_test_emails.sh
    ```
 
 3. View logs:
+
    ```bash
    docker logs -f email-invoice-processor
    ```
@@ -236,6 +246,7 @@ Logs are written to the following locations by default:
 - Debug logs: `logs/debug.log` (when LOG_LEVEL=DEBUG)
 
 View logs in real-time:
+
 ```bash
 tail -f logs/email_processor.log
 ```
@@ -255,7 +266,7 @@ docker run --rm -v $(pwd)/output:/app/output email-processor
 ### Docker Compose
 
 ```yaml
-version: '3.8'
+version: "3.8"
 services:
   email-processor:
     build: .
@@ -274,11 +285,13 @@ services:
 ### Common Issues
 
 1. **Authentication Failed**
+
    - Verify email credentials
    - Check if IMAP access is enabled for your email account
    - For Gmail, you may need to use an App Password
 
 2. **OCR Not Working**
+
    - Ensure Tesseract is installed and in PATH
    - Verify language packs are installed
    - Check file permissions on input files
@@ -290,31 +303,34 @@ services:
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
-   - Set up development tools
+
+- Set up development tools
 
 ## Configuration
 
 1. Copy the example environment file:
+
    ```bash
    cp .env.example .env
    ```
 
 2. Edit `.env` with your email credentials and settings:
+
    ```ini
    # Email Server Configuration
    EMAIL_SERVER=imap.example.com
    EMAIL_PORT=993
    EMAIL_USERNAME=your_email@example.com
    EMAIL_PASSWORD=your_app_specific_password
-   
+
    # Processing Settings
    YEAR=2025
    MONTH=5
    OUTPUT_DIR=./output
-   
+
    # OCR Settings
    TESSERACT_CMD=/usr/bin/tesseract
-   
+
    # Logging
    LOG_LEVEL=INFO
    LOG_FILE=email_processor.log
@@ -325,6 +341,7 @@ This project is licensed under the MIT License - see the [LICENSE](../LICENSE) f
 ## Usage
 
 ### Using Make (recommended)
+
 ```bash
 # Run the email processor
 make run
@@ -363,6 +380,7 @@ make clean     # Clean up temporary files
 ## Output Structure
 
 For each processed email attachment, the script will create:
+
 1. The original file (PDF, JPG, etc.)
 2. A JSON file with the same base name containing:
    - Original filename

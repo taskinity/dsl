@@ -15,7 +15,7 @@
   copy:
     src: 20auto-upgrades
     dest: /etc/apt/apt.conf.d/20auto-upgrades
-    mode: '0644'
+    mode: "0644"
   tags: [security, updates]
 
 - name: Configure UFW (Uncomplicated Firewall)
@@ -26,9 +26,9 @@
     direction: "{{ item.direction | default('in') }}"
     state: enabled
   with_items:
-    - { rule: 'allow', port: '22', proto: 'tcp', description: 'SSH' }
-    - { rule: 'allow', port: '80', proto: 'tcp', description: 'HTTP' }
-    - { rule: 'allow', port: '443', proto: 'tcp', description: 'HTTPS' }
+    - { rule: "allow", port: "22", proto: "tcp", description: "SSH" }
+    - { rule: "allow", port: "80", proto: "tcp", description: "HTTP" }
+    - { rule: "allow", port: "443", proto: "tcp", description: "HTTPS" }
   notify: reload ufw
   tags: [security, firewall]
 
@@ -38,14 +38,14 @@
     regexp: "^#?{{ item.option }}"
     line: "{{ item.option }} {{ item.value }}"
     state: present
-    validate: 'sshd -t -f %s'
+    validate: "sshd -t -f %s"
   with_items:
-    - { option: 'PermitRootLogin', value: 'no' }
-    - { option: 'PasswordAuthentication', value: 'no' }
-    - { option: 'X11Forwarding', value: 'no' }
-    - { option: 'MaxAuthTries', value: '3' }
-    - { option: 'ClientAliveInterval', value: '300' }
-    - { option: 'ClientAliveCountMax', value: '2' }
+    - { option: "PermitRootLogin", value: "no" }
+    - { option: "PasswordAuthentication", value: "no" }
+    - { option: "X11Forwarding", value: "no" }
+    - { option: "MaxAuthTries", value: "3" }
+    - { option: "ClientAliveInterval", value: "300" }
+    - { option: "ClientAliveCountMax", value: "2" }
   notify: restart sshd
   tags: [security, ssh]
 
@@ -53,7 +53,7 @@
   template:
     src: jail.local.j2
     dest: /etc/fail2ban/jail.local
-    mode: '0644'
+    mode: "0644"
   tags: [security, fail2ban]
   notify: restart fail2ban
 
@@ -68,5 +68,5 @@
   copy:
     src: security
     dest: /etc/logrotate.d/security
-    mode: '0644'
+    mode: "0644"
   tags: [security, logging]

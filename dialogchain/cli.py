@@ -79,7 +79,7 @@ def init(template, output):
         f.write(template_content)
 
     click.echo(f"✓ Generated {template} template in {output}")
-    click.echo(f"📝 Edit the configuration and run: camel-router run -c {output}")
+    click.echo(f"📝 Edit the configuration and run: dialogchain run -c {output}")
 
 
 @cli.command()

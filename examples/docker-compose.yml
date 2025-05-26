@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 networks:
   taskinity-network:
@@ -37,8 +37,8 @@ services:
       - EMAIL_USER=test@example.com
       - EMAIL_PASSWORD=testpass
     env_file:
-      - ./examples/email-invoices/.env
-      - ./examples/web-invoices/.env
+      - ./email-invoices/.env
+      - ./web-invoices/.env
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -48,7 +48,14 @@ services:
       start_period: 5s
     ports:
       - "8000:8000"
-    command: ["python", "-m", "taskinity.cli", "--config", "/app/config/email_invoices.yaml"]
+    command:
+      [
+        "python",
+        "-m",
+        "taskinity.cli",
+        "--config",
+        "/app/config/email_invoices.yaml",
+      ]
     depends_on:
       - mailserver
     networks:
@@ -75,14 +82,20 @@ services:
       - EMAIL_USER=test@example.com
       - EMAIL_PASSWORD=testpass
     env_file:
-      - ./examples/email-invoices/.env
+      - ./email-invoices/.env
     restart: unless-stopped
     depends_on:
       - mailserver
     networks:
       - taskinity-network
-      - taskinity-dsl
-    command: ["python", "-m", "taskinity.runner", "--config", "/app/config/email_invoices.yaml"]
+    command:
+      [
+        "python",
+        "-m",
+        "taskinity.runner",
+        "--config",
+        "/app/config/email_invoices.yaml",
+      ]
 
   # Web Invoice Processor Service
   web-processor:
@@ -101,11 +114,18 @@ services:
       - LOG_LEVEL=INFO
       - OUTPUT_DIR=/app/output
     env_file:
-      - ./examples/web-invoices/.env
+      - ./web-invoices/.env
     restart: unless-stopped
     depends_on:
       - taskinity-dsl
-    command: ["python", "-m", "taskinity.runner", "--config", "/app/config/web_invoices.yaml"]
+    command:
+      [
+        "python",
+        "-m",
+        "taskinity.runner",
+        "--config",
+        "/app/config/web_invoices.yaml",
+      ]
 
 # Volumes for persistent storage
 volumes:
@@ -113,8 +133,3 @@ volumes:
   logs:
   output:
   config:
-
-# Network configuration
-networks:
-  default:
-    driver: bridge

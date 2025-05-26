@@ -68,8 +68,18 @@ providers:
 	@echo "\n\033[1mAvailable providers:\033[0m"
 	@ls -1 providers/ | grep -v "__" | sed 's/\.py//' | sed 's/^/  - /'
 
+# Stop Docker containers and remove volumes
+stop:
+	@echo "Stopping all Docker containers and removing volumes..."
+	@if [ -f "../docker-compose.yml" ]; then \
+		docker-compose -f ../docker-compose.yml down -v --remove-orphans || true; \
+		echo "✅ All Docker containers stopped and volumes removed"; \
+	else \
+		echo "ℹ️  No docker-compose.yml found in parent directory"; \
+	fi
+
 # Clean up
-clean:
+clean: stop
 	find . -type d -name "__pycache__" -exec rm -r {} \; || true
 	find . -type d -name "*.egg-info" -exec rm -r {} \; || true
 	find . -type d -name ".pytest_cache" -exec rm -r {} \; || true

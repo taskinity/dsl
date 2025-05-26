@@ -1,4 +1,4 @@
-# Camel Router - Multi-language ML/Media Processing Pipeline
+# DialogChain - Flexible Dialog Processing Framework
 # Makefile for development and deployment
 
 .PHONY: help install dev test clean build docker run-example lint docs \
@@ -7,7 +7,7 @@
 
 # Default target
 help:
-	@echo "Camel Router - Multi-language Processing Engine"
+	@echo "DialogChain - Flexible Dialog Processing Framework"
 	@echo ""
 	@echo "Available commands:"
 	@echo "  install          - Install the package and dependencies"
@@ -27,7 +27,7 @@ help:
 # Installation
 install:
 	pip install -e .
-	@echo "✅ Camel Router installed"
+	@echo "✅ DialogChain installed"
 
 dev: install
 	pip install -e ".[dev]"
@@ -36,16 +36,14 @@ dev: install
 # Dependencies for different languages
 install-deps:
 	@echo "Installing dependencies for external processors..."
-	# Python ML dependencies
-	pip install ultralytics opencv-python numpy
+	# Python NLP dependencies
+	pip install transformers spacy nltk
 
-	# Check if Go is installed
-	@which go > /dev/null || (echo "❌ Go not found. Install from https://golang.org/dl/" && exit 1)
-	@echo "✅ Go found: $$(go version)"
+	# Check if Go is installed (optional)
+	@which go > /dev/null && echo "✅ Go found: $$(go version)" || echo "ℹ️  Go not found. Install from https://golang.org/dl/ if needed"
 
-	# Check if Node.js is installed
-	@which node > /dev/null || (echo "⚠️  Node.js not found. Install from https://nodejs.org/")
-	@which node > /dev/null && echo "✅ Node.js found: $$(node --version)"
+	# Check if Node.js is installed (optional)
+	@which node > /dev/null && echo "✅ Node.js found: $$(node --version)" || echo "ℹ️  Node.js not found. Install from https://nodejs.org/ if needed"
 
 	# Check if Rust is installed
 	@which cargo > /dev/null || (echo "⚠️  Rust not found. Install from https://rustup.rs/")
@@ -53,7 +51,7 @@ install-deps:
 
 # Development
 test:
-	python -m pytest tests/ -v
+	cd tests && python -m pytest -v
 	@echo "✅ Tests completed"
 
 lint:
@@ -80,15 +78,15 @@ build: clean
 
 # Docker
 docker:
-	docker build -t camel-router:latest .
-	@echo "✅ Docker image built: camel-router:latest"
+	docker build -t dialogchain:latest .
+	@echo "✅ Docker image built: dialogchain:latest"
 
 docker-run: docker
 	docker run -it --rm \
 		-v $(PWD)/examples:/app/examples \
 		-v $(PWD)/.env:/app/.env \
-		camel-router:latest \
-		camel-router run -c examples/simple_routes.yaml
+		dialogchain:latest \
+		dialogchain run -c examples/simple_routes.yaml
 
 # Examples and setup
 setup-env:
@@ -110,15 +108,15 @@ list-examples:
 
 # Initialize example configurations
 init-camera:
-	camel-router init --template camera --output examples/camera_routes.yaml
+	poetry run dialogchain init --template camera --output examples/camera_routes.yaml
 	@echo "✅ Camera configuration template created"
 
 init-grpc:
-	camel-router init --template grpc --output examples/grpc_routes.yaml
+	poetry run dialogchain init --template grpc --output examples/grpc_routes.yaml
 	@echo "✅ gRPC configuration template created"
 
 init-iot:
-	camel-router init --template iot --output examples/iot_routes.yaml
+	poetry run dialogchain init --template iot --output examples/iot_routes.yaml
 	@echo "✅ IoT configuration template created"
 
 # Run examples
@@ -131,15 +129,15 @@ run-example: setup-env
 	@echo "🚀 Starting $(EXAMPLE) example..."
 	@case "$(EXAMPLE)" in \
 		simple) \
-			python -m src.camel_router.cli --config examples/simple_routes.yaml ;; \
+			poetry run dialogchain run -c examples/simple_routes.yaml ;; \
 		grpc) \
 			docker-compose -f examples/docker-compose.yml up -d grpc-server && \
-			python -m src.camel_router.cli --config examples/grpc_routes.yaml ;; \
+			poetry run dialogchain run -c examples/grpc_routes.yaml ;; \
 		iot) \
 			docker-compose -f examples/docker-compose.yml up -d mosquitto && \
-			python -m src.camel_router.cli --config examples/iot_routes.yaml ;; \
+			poetry run dialogchain run -c examples/iot_routes.yaml ;; \
 		camera) \
-			python -m src.camel_router.cli --config examples/camera_routes.yaml ;; \
+			poetry run dialogchain run -c examples/camera_routes.yaml ;; \
 		*) \
 			echo "Error: Unknown example '$(EXAMPLE)'"; \
 			exit 1 ;; \
@@ -156,7 +154,7 @@ view-logs:
 		grpc|iot) \
 			docker-compose -f examples/docker-compose.yml logs -f ;; \
 		*) \
-			tail -f logs/camel_router.log ;; \
+			tail -f logs/dialogchain.log ;; \
 	esac
 
 # Stop a running example
@@ -168,10 +166,16 @@ stop-example:
 	fi
 	@case "$(EXAMPLE)" in \
 		grpc|iot) \
-			docker-compose -f examples/docker-compose.yml down ;; \
+			docker-compose -f examples/docker-compose.yml down -v --remove-orphans ;; \
 		*) \
 			echo "Example '$(EXAMPLE)' runs in the foreground. Use Ctrl+C to stop." ;; \
 	esac
+
+# Stop all Docker containers and remove volumes
+stop:
+	@echo "Stopping all Docker containers and removing volumes..."
+	@docker-compose -f examples/docker-compose.yml down -v --remove-orphans || true
+	@echo "✅ All Docker containers stopped and volumes removed"
 
 # Alias for backward compatibility
 run-camera: setup-env
@@ -191,17 +195,17 @@ run-simple: setup-env
 	@make run-example EXAMPLE=simple
 
 validate:
-	camel-router validate -c examples/simple_routes.yaml
+	poetry run dialogchain validate -c examples/simple_routes.yaml
 	@echo "✅ Configuration validated"
 
 dry-run:
-	camel-router run -c examples/simple_routes.yaml --dry-run
+	poetry run dialogchain run -c examples/simple_routes.yaml --dry-run
 	@echo "✅ Dry run completed"
 
 # External processor compilation
 build-go:
 	@echo "🔨 Building Go processors..."
-	cd scripts && go mod init camel-processors || true
+	cd scripts && go mod init dialogchain-processors || true
 	cd scripts && go mod tidy || true
 	cd scripts && go build -o ../bin/image_processor image_processor.go
 	cd scripts && go build -o ../bin/health_check health_check.go
@@ -261,8 +265,8 @@ docs:
 
 # Deployment helpers
 deploy-docker:
-	docker tag camel-router:latest your-registry.com/camel-router:latest
-	docker push your-registry.com/camel-router:latest
+	docker tag dialogchain:latest your-registry.com/dialogchain:latest
+	docker push your-registry.com/dialogchain:latest
 	@echo "✅ Docker image deployed"
 
 deploy-k8s:

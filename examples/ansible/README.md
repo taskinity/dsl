@@ -27,6 +27,7 @@ ansible/
 ## Quick Start
 
 1. Install Ansible:
+
    ```bash
    sudo apt update
    sudo apt install -y ansible
@@ -57,16 +58,19 @@ The playbook includes several tags for running specific parts:
 ## Examples
 
 ### Install Dependencies Only
+
 ```bash
 ansible-playbook -i inventory/localhost.ini playbook.yml --tags deps
 ```
 
 ### Run Tests Only
+
 ```bash
 ansible-playbook -i inventory/localhost.ini playbook.yml --tags test
 ```
 
 ### Configure and Test Email Processor
+
 ```bash
 ansible-playbook -i inventory/localhost.ini playbook.yml \
   --tags "config,test" \
@@ -77,40 +81,41 @@ ansible-playbook -i inventory/localhost.ini playbook.yml \
 
 ### Email Processor Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `email_server` | `imap.example.com` | IMAP server address |
-| `email_port` | `993` | IMAP server port |
-| `email_user` | `your-email@example.com` | Email username |
-| `email_password` | `your-password` | Email password |
-| `email_folder` | `INBOX` | Email folder to process |
-| `processed_folder` | `Processed` | Folder for processed emails |
-| `error_folder` | `Errors` | Folder for error emails |
-| `output_dir` | `./output` | Output directory |
-| `log_level` | `INFO` | Logging level |
-| `tesseract_cmd` | `/usr/bin/tesseract` | Path to Tesseract OCR |
-| `ocr_languages` | `eng,pol` | OCR languages |
+| Variable           | Default                  | Description                 |
+| ------------------ | ------------------------ | --------------------------- |
+| `email_server`     | `imap.example.com`       | IMAP server address         |
+| `email_port`       | `993`                    | IMAP server port            |
+| `email_user`       | `your-email@example.com` | Email username              |
+| `email_password`   | `your-password`          | Email password              |
+| `email_folder`     | `INBOX`                  | Email folder to process     |
+| `processed_folder` | `Processed`              | Folder for processed emails |
+| `error_folder`     | `Errors`                 | Folder for error emails     |
+| `output_dir`       | `./output`               | Output directory            |
+| `log_level`        | `INFO`                   | Logging level               |
+| `tesseract_cmd`    | `/usr/bin/tesseract`     | Path to Tesseract OCR       |
+| `ocr_languages`    | `eng,pol`                | OCR languages               |
 
 ### Web Processor Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `aws_access_key_id` | `your_access_key` | AWS Access Key ID |
-| `aws_secret_access_key` | `your_secret_key` | AWS Secret Access Key |
-| `aws_region` | `us-east-1` | AWS Region |
+| Variable                         | Default                     | Description             |
+| -------------------------------- | --------------------------- | ----------------------- |
+| `aws_access_key_id`              | `your_access_key`           | AWS Access Key ID       |
+| `aws_secret_access_key`          | `your_secret_key`           | AWS Secret Access Key   |
+| `aws_region`                     | `us-east-1`                 | AWS Region              |
 | `google_application_credentials` | `/path/to/credentials.json` | Path to GCP credentials |
-| `azure_subscription_id` | `your_subscription_id` | Azure Subscription ID |
-| `azure_tenant_id` | `your_tenant_id` | Azure Tenant ID |
-| `azure_client_id` | `your_client_id` | Azure Client ID |
-| `azure_client_secret` | `your_client_secret` | Azure Client Secret |
-| `output_dir` | `./output` | Output directory |
-| `log_level` | `INFO` | Logging level |
+| `azure_subscription_id`          | `your_subscription_id`      | Azure Subscription ID   |
+| `azure_tenant_id`                | `your_tenant_id`            | Azure Tenant ID         |
+| `azure_client_id`                | `your_client_id`            | Azure Client ID         |
+| `azure_client_secret`            | `your_client_secret`        | Azure Client Secret     |
+| `output_dir`                     | `./output`                  | Output directory        |
+| `log_level`                      | `INFO`                      | Logging level           |
 
 ## Testing with Docker
 
 You can also test the processors using Docker:
 
 1. Build the Docker images:
+
    ```bash
    cd /path/to/taskinity-dsl
    docker-compose -f examples/docker-compose.yml build
@@ -127,10 +132,12 @@ You can also test the processors using Docker:
 ### Common Issues
 
 1. **Permission Denied**
+
    - Run the playbook with `--become` if you need root privileges
    - Ensure the user has sudo access
 
 2. **Python Dependencies**
+
    - Make sure Python 3.8+ is installed
    - Check that pip is up to date
 

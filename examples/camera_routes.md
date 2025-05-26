@@ -21,7 +21,6 @@ This example demonstrates video processing pipelines using Taskinity DSL, includ
 
 ### Using Make (Recommended)
 
-
 ```bash
 # Start the camera processing pipeline
 make run-example EXAMPLE=camera
@@ -36,6 +35,7 @@ make stop-example EXAMPLE=camera
 ### Manual Execution
 
 1. Start the processing services:
+
    ```bash
    docker-compose -f examples/docker-compose.yml up -d
    ```

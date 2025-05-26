@@ -1,3 +1,7 @@
+venv
+venv311
+venv312
+dialogchain.*
 # Project specific
 config.json
 .env

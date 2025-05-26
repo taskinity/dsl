@@ -63,7 +63,7 @@ ml = [
 ]
 
 [project.scripts]
-camel-router = "camel_router.cli:main"
+camel-router = "dialogchain.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/taskinity/camel-router"
@@ -73,7 +73,7 @@ Issues = "https://github.com/taskinity/camel-router/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["camel_router*"]
+include = ["dialogchain*"]
 
 [tool.black]
 line-length = 88
@@ -93,5 +93,5 @@ disallow_untyped_defs = true
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
-addopts = "--cov=camel_router --cov-report=term-missing"
+addopts = "--cov=dialogchain --cov-report=term-missing"
 asyncio_mode = "auto"
